@@ -1,0 +1,41 @@
+
+text |The catch block is used as a way of defining callbacks, which are simply functions. But since you are not allowed to define values in a nested fashion inside functions, we have the catch block to define callbacks inline, which is a common paradigm.|
+
+text |So you have this:|
+
+code xo
+  |
+    cause force
+      catch check
+        start build
+        throw build, share build
+          latch check
+  |
+
+text |Which means this:|
+
+code xo
+  |
+    cause force
+      mount check, share force-check-1
+
+    force force-check-1
+      throw build
+  |
+
+text |Notice in the check, you have a latch, which references the check typically. When converted, it resolves to the proper latch, in this case just returning to the calling function. To return to the parent lexical scope, you can do it like this:|
+
+code xo
+  |
+    cause force
+      catch check
+        throw build
+
+    cause force
+      mount check
+
+    force force-check-1
+      throw build, latch top-level-force
+  |
+
+So really, a cause only has mounts, and the catches get hoisted out into defined functions in the causes calling scope.

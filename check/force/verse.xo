@@ -1,0 +1,21 @@
+
+field x
+
+force x
+
+force x
+  start x
+
+force x
+  start x, field x
+
+cause call-force
+  store x
+
+write share x
+
+force call-force
+  cause mount-count
+    write start, 1
+    write front, 2
+    throw build

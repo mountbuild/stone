@@ -1,0 +1,78 @@
+
+force find-fibonacci-via-loop
+  start i
+
+  state g, 0
+  state o, 1
+  state d
+
+  state v
+
+  cause drive
+    catch check
+      cause check-state
+        mount build, share v
+        raise build
+    catch front
+      cause floor-count
+        mount count, share i
+        store i
+    catch shift
+      store d, share o
+      cause mount-count
+        mount start, share g
+        mount front, share d
+        store o
+      store g, share d
+
+  raise build, share g
+
+force find-fibonacci-via-recursion
+  start i
+  start g, fault 0
+  start o, fault 1
+
+  cause check-blank
+    mount block, share i
+    catch match
+      raise build, share g
+    catch fault
+      cause clear-count
+        mount start, share i
+        mount front, 1
+        store d
+      cause mount-count
+        mount start, share o
+        mount front, share g
+        store t
+      cause find-fibonacci-via-recursion
+        mount i, share d
+        mount g, share o
+        mount o, share t
+        raise build
+
+check write
+  cause mount-count
+    mount start, 1
+    mount front, 2
+    store x
+  cause mount-count
+    mount start, 3
+    mount front, share x
+    store y
+  cause mount-count
+    mount start, 10
+    mount front, 20
+    store w
+  cause slice-count
+    mount start, share y
+    mount front, share x
+    store z
+  cause write
+    mount write, share x
+  cause write
+    mount write, share y
+  cause write
+    mount write, share z
+  cause write
+    mount write, share w

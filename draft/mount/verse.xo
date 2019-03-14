@@ -1,0 +1,2 @@
+
+The virtual machine is the mount. It runs in a loop, processing 2^16 items before taking a breath for events in the event loop.

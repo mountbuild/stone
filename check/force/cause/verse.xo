@@ -1,0 +1,29 @@
+
+force x
+  start x
+
+force x
+  cause x
+
+force x
+  cause x
+    mount x, 10
+
+force x
+  cause x
+    mount x, 10
+    raise build
+
+force x
+  cause x
+    mount x, 10
+    throw build
+
+force x
+  cause x
+    mount x, 10
+    catch build
+      start build
+
+      cause throw
+        mount build, share build

@@ -1,0 +1,57 @@
+
+A block is like a C struct. It is a contiguous array of fields. It is a power of two in size up to 16, so it can be any of these sizes:
+
+- 1
+- 2
+- 4
+- 8
+- 16
+
+Each block begins with a shard identifier, which is the lowest 8-bits. The shard identifier can be any of the following values:
+
+- count-24
+- count-56
+- write-3
+- write-7
+- block-4
+- block-8
+- block-16
+- stick
+
+If the shard is a count, write, blank, or state shard, then we can determine its type directly from the shard. Otherwise it has a second field following the shard field, called the class field, which specifies the class. A shard of type block stores that many fields. Any block containing more than 16 fields automatically forms into a b-tree, with shard type stick.
+
+A block 4 has 4 fields, 2 of which are the shard and class fields, and two of which can be custom. A block 8 has 6 custom fields, and block 16 has 14 custom fields.
+
+Not all builds are blocks. The B+tree, for example, stores 16 element shard with no header information for its child array.
+
+## The count shard
+
+A count-24 shard is structured like this:
+
+<24 bits of integer><8-bit shard header>
+
+In little-endian form. This can store up to 16,777,216 integers, using only 1 32-bit slot.
+
+Each count shard larger stores an addition 32, 96, 160, or 288 bits of integer, every 32-bits being a new element in the count computation.
+
+## The write shard
+
+The write-3 shard is structured like this:
+
+<3 bytes of characters><8-bit shard header>
+
+Each write shard adds more characters corresponding to its size. Writes larger than a 16-32 bit chunk are stored as block types. The largest block type is block-16, where 14 slots can hold pointers to write-38 blocks. For a total of 532 characters. Writes larger than this use a stick.
+
+## The state shard
+
+Lots of state can be held in the state shard, without it spilling over into a chain or stick.
+
+## The block shard
+
+Other than short strings and integers up to a certain size, blocks are the way most class instances are stored. Each record has a shard field, followed by a class field.
+
+There's an overall limit of 2^32 classes allowed, or 4,294,967,296. These are in-memory locations of classes, not of globally unique IDs of them.
+
+## Non-blocks
+
+You can also store records so they are used in other contexts, like WebGL. These records are stored without the extra header information and are stored however is necessary.

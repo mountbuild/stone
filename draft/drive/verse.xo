@@ -1,0 +1,7 @@
+
+There are two drive nodes:
+
+- stack
+- flush
+
+The stack drive is appending inputs to a list, and the flush is calling a special native function.

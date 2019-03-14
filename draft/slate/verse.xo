@@ -1,0 +1,6 @@
+
+The slate is the memory. The memory consists of 16 bins, increasing in powers of two from 32 to x. Memory is allocated from one of these bins to fit the size of the request, with max block record size of 16 32-bit slots, but other large chunks of memory can be consumed and used for things like WebGL.
+
+Each bin keeps track of the total for it.
+
+So then you preallocate some blocks as necessary, and you get new blocks from memory. But this works without the need of a call-stack.

@@ -1,0 +1,18 @@
+
+The stick classes are a set of B+tree classes implementing various B+trees for storing collections of items. They include:
+
+- chain
+- latch
+- hatch
+
+## The chain stick
+
+The chain stick is an index-based tree, like an array.
+
+## The latch stick
+
+The latch stick is a key-only tree, like a set data structure.
+
+## The hatch stick
+
+The hatch stick is a key-value tree, like a hash but instead using a tree.

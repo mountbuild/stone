@@ -1,0 +1,350 @@
+
+head |The :c(|cause|) block|
+
+text |To handle null:|
+
+code xo
+  |
+  cause force
+    mount field, blank
+  |
+
+text |This is the same as null:|
+
+code xo
+  |
+  cause force
+    mount field
+  |
+
+text |Numbers:|
+
+code xo
+  |
+  cause force
+    mount field, 123
+  |
+
+text |Strings:|
+
+code xo
+  |
+  cause force
+    mount field, |hello world|
+  |
+
+text |Special characters:|
+
+code xo
+  |
+  cause force
+    mount field, #b101010
+  |
+
+text |Building an array value one item at a time:|
+
+code xo
+  |
+  cause force
+    chain field, 123
+    chain field, 456
+  |
+
+text |Store the result in a variable.|
+
+code xo
+  |
+  cause force
+    store brand
+  |
+
+text |It defaults to actually being:|
+
+code xo
+  |
+  cause force
+    store brand
+      shift white
+      write black
+  |
+
+text |Where `shift white` means it transfers ownership to the `name` variable.|
+
+text |To make the value mutable, you have to be explicit.|
+
+code xo
+  |
+  cause force
+    store brand, write white
+  |
+
+text |To borrow it instead of transferring ownership, you can do:|
+
+code xo
+  |
+  cause force
+    share brand
+  |
+
+text |A mutable borrow is:|
+
+code xo
+  |
+  cause force
+    share brand, write white
+  |
+
+text |These are all shortened versions of catching an output:|
+
+code xo
+  |
+  cause force
+    catch build
+      start build, reach build
+  |
+
+text |The default or "standard" return value is `catch build`.|
+
+text |You can reach into objects to rename variables:|
+
+code xo
+  |
+  cause force
+    catch build
+      start field-1, reach build/x
+      start field-2, reach build/o
+  |
+
+text |Inside the catch body you then add more causes. The catch is essentially a new nested function. But it gets optimized as necessary.|
+
+code xo
+  |
+  cause force
+    catch build
+      start field-1, reach build/x
+      start field-2, reach build/o
+      cause force-2
+  |
+
+text |To "throw" a value means to send it to the calling function. Throwing at the end of a function is equivalent to a `raise`. So `throw build` is your standard return for simple functions, or `raise build`.|
+
+code xo
+  |
+  cause force
+    raise build
+  |
+
+text |Is equivalent to:|
+
+code xo
+  |
+  cause force
+    catch build
+      start build
+
+      cause raise
+        mount brand, build
+        mount build, share build
+  |
+
+text |Likewise, `throw` is:|
+
+code xo
+  |
+  cause force
+    throw build
+  |
+
+text |Is equivalent to:|
+
+code xo
+  |
+  cause force
+    catch build
+      start build
+
+      cause throw
+        mount brand, build
+        mount build, share build
+  |
+
+text |Then there is building, which is constructing a new object. You can do that with `build brand`:|
+
+code xo
+  |
+  build force
+    chain start, ...
+    chain start, ...
+    chain cause
+  |
+
+text |You always store the result of a computation after the action, not setting it equal like most programming languages.|
+
+text |Sometimes a `catch` is asking for a return value. To specify the "return target" for a raise or throw, you simply specify a "latch".|
+
+text |A latch is defined on the `catch`, which is the name of the return location. Then you specify it like this:|
+
+code xo
+  |
+  cause force
+    catch check, latch check
+      cause force-2
+        throw build, latch check
+  |
+
+text |The name of the latch defaults to the name of the catch, so you could have this instead:|
+
+code xo
+  |
+  cause force
+    catch check
+      cause force-2
+        throw build, latch check
+  |
+
+text |Otherwise, if you don't specify the latch, the throw or raise goes to the top-level function scope.|
+
+text |Sometimes you can specify multiple catches of the same name. This ammounts ot an array of catches under that name. This is used for example in processing "or" checks.|
+
+code xo
+  |
+  cause check-or
+    catch check
+      cause check-1
+        throw build, latch check
+    catch check
+      cause check-2
+        throw build, latch check
+    catch match
+      cause force-2
+  |
+
+text |Notice, too, that they can be in pairs in this way. In reality, this creates two arrays and they are lined up that way. That is how a bunch of if/else statements work:|
+
+code xo
+  |
+  cause check-match
+    catch check
+      cause check-1
+        throw build, latch check
+    catch match
+      cause force-1
+    catch check
+      cause check-2
+        throw build, latch check
+    catch match
+      cause force-2
+  |
+
+text |You can store values using the `store` command.|
+
+code xo
+  |
+  store brand, share brand-2
+  |
+
+text |The brand can be a complex nested expression, such as these:|
+
+code xo
+  |
+  store brand/nested, 10
+  store brand/children[index]/nested, 10
+  |
+
+text |This is the same as the expanded version:|
+
+code xo
+  |
+  cause store
+    mount start, share brand
+    mount front, share brand-2
+  |
+
+text |Now, you can define new state variables at any point. The compiler at compile time will use these to determine how to build the drive for a running function.|
+
+code xo
+  |
+  state brand, field class
+  |
+
+text |You can quickly print values with the write command.|
+
+code xo
+  |
+  write share brand
+  |
+
+text |You can pause the execution with `stall`.|
+
+text |You can clone a variable with `clone`.|
+
+text |A boolean is either `black` (false) or `white` (true).|
+
+text |A while loop is like this:|
+
+code xo
+  |
+  cause drive
+    catch check
+      ...
+      throw build, latch check
+    catch shift
+      ...
+  |
+
+text |A for loop, where you perform some step after each action, is similar with a `front` catch.|
+
+code xo
+  |
+  cause drive
+    catch check
+      ...
+      throw build, latch check
+    catch shift
+      ...
+    catch front
+      ...
+  |
+
+text |An iterator for a list is like this:|
+
+code xo
+  |
+  cause drive
+    mount chain, share chain
+    catch block
+      start block
+      start count
+      ...
+  |
+
+text |An iterator for a hash table is like this:|
+
+code xo
+  |
+  cause drive
+    mount chain, share chain
+    catch block
+      start latch
+      start build
+      ...
+  |
+
+text |A multi-step if-statement, or like a switch statement, is a check.|
+
+code xo
+  |
+  cause check
+    catch check
+      ...
+      throw build, latch check
+    catch match
+      ...
+    catch check
+      ...
+      throw build, latch check
+    catch match
+      ...
+    catch fault
+      ...
+  |

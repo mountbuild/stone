@@ -1,0 +1,13 @@
+
+stack @mount/stone
+  class application
+  brief |Stone Compiler|
+  brand |Stone|
+  brand |Computation|
+  brand |Philosophy|
+  brand |Information|
+  brand |Platform|
+  brand |White Label|
+  trace |Lance Pollard <lp@elk.fm>|
+  stack ./stack
+  mount ./mount

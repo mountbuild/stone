@@ -1,0 +1,46 @@
+
+There are 8 tracks that are defined for low-level functions:
+
+- track-shift-track
+- track-shift-drive
+- track-fetch-share
+- track-fetch-build
+- track-store-build
+- track-fetch-cause
+- track-shift-cause
+- track-mount-cause
+
+## track-shift-track
+
+This shifts the stack from being a rich one to being a simple one, used for the allocation algorithm.
+
+## track-drive-shift
+
+This is to create a new drive block that is large enough to fit the next function calls variables and state. It has this signature:
+
+track drive-shift
+  mount scale, 8
+
+The scale is always a power of 2 up to 16. The drive record has the following properties:
+
+field drive
+  state start, field drive
+  state front, chain drive
+  state store, field store
+  state shift
+
+field store
+  state state
+  state house, field store
+
+So the first 8 properties of the drive are internal to it.
+
+A store record exists to store the local variables. Say there are 100 local variables. The 100 local variables are stored as a chain stick type in the state field. This internally is implemented as a B+tree, where nodes are each 16 slots in size.
+
+## track-shift-cause
+
+This calls a method so to speak.
+
+## track-mount-cause
+
+This calls a native function.

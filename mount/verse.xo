@@ -1,0 +1,8 @@
+
+fetch @mount/start/theme
+  fetch /build
+    catch theme build
+
+mount build
+  match ../check/*.xo
+  match ../check/**/*.xo
