@@ -109,7 +109,7 @@ The XO Language was conceived in the winter of 2015, and the compiler idea in wi
 
 ### Contribute
 
-Contributions are greatly welcomed. Help us define what the ideal interface would be for a terminal-editor-debugger app. Identify the key painpoints in the customer onboarding flow, and help us map out the best solutions. See the [contributor's guide](https://github.com/mountbuild/stone/blob/build/contributing.md) for more info if you are just starting out coding.
+Contributions are greatly welcomed. Help us define what the ideal interface would be for a terminal-editor-debugger app. Identify the key painpoints in the customer onboarding flow, and help us map out the best solutions. See the [contributor's guide](https://github.com/mountbuild/.github/blob/build/contributing.md) for more info if you are just starting out coding.
 
 ### License
 
