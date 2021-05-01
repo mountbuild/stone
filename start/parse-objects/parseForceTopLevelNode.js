@@ -115,7 +115,7 @@ function parseForce_stack(sheet, verse) {
 }
 
 function parseForce_write(sheet, verse) {
-  return shared.buildRaiseThrow(sheet, `write`, verse)
+  return parseCauseNode(sheet, verse, 'write')
 }
 
 function parseForce_claim(sheet, verse) {

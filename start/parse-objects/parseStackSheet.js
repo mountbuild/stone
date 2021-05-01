@@ -22,7 +22,7 @@ function parseStack_stack(sheet, verse) {
     authors: [],
     image: null,
     readme: null,
-    match: [],
+    front: [],
     mount: [],
     license: null
   }
@@ -41,14 +41,14 @@ function parseStack_stack(sheet, verse) {
       case 'brand':
         parseStack_stack_brand(sheet, stack, verse)
         break
-      case 'trace':
-        parseStack_stack_trace(sheet, stack, verse)
+      case 'touch':
+        parseStack_stack_touch(sheet, stack, verse)
         break
       case 'flash':
         parseStack_stack_flash(sheet, stack, verse)
         break
-      case 'match':
-        parseStack_stack_match(sheet, stack, verse)
+      case 'front':
+        parseStack_stack_front(sheet, stack, verse)
         break
       case 'mount':
         parseStack_stack_mount(sheet, stack, verse)
@@ -73,7 +73,7 @@ function parseStack_stack_brand(sheet, stack, verse) {
   stack.tags.push(tag)
 }
 
-function parseStack_stack_trace(sheet, stack, verse) {
+function parseStack_stack_touch(sheet, stack, verse) {
   const author = shared.getStringFromFirst(verse)
   stack.authors.push(author)
 }
@@ -83,10 +83,10 @@ function parseStack_stack_flash(sheet, stack, verse) {
   stack.image = image
 }
 
-function parseStack_stack_match(sheet, stack, verse) {
-  let match = path.resolve(path.join(stack.path, shared.getPathFromFirst(verse)))
-  if (!match.match(/\.xo$/)) match = `${match}/verse.xo`
-  stack.match.push(match)
+function parseStack_stack_front(sheet, stack, verse) {
+  let front = path.resolve(path.join(stack.path, shared.getPathFromFirst(verse)))
+  if (!front.match(/\.xo$/)) front = `${front}/verse.xo`
+  stack.front.push(front)
 }
 
 function parseStack_stack_mount(sheet, stack, verse) {

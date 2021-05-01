@@ -1,20 +1,9 @@
-
-const global = typeof window == 'undefined' ? global : window
-
-class KeyValue {
-  constructor(key, value) {
-      this.key = key;
-      this.value = value;
-  }
-}
-
-class KeyValueNode {
+class Node {
   constructor(capacity) {
       // Mimic fixed-size array (avoid accidentally growing it)
       this.children = Object.seal(Array(capacity).fill(null));
       this.childCount = 0; // Number of used slots in children array
-      // The algorithm relies on that fact that both KeyValue & KeyValueNode have a key property:
-      this.key = null; // Here it is a property for supporting a search
+      this.treeSize = 0; // Total number of values in this subtree
       // Maintain back-link to parent.
       this.parent = null;
       // Per level in the tree, maintain a doubly linked list
@@ -28,17 +17,27 @@ class KeyValueNode {
       this.children = children;
   }
   isLeaf() {
-      return !(this.children[0] instanceof KeyValueNode);
+      return !(this.children[0] instanceof Node);
   }
   index() {
       return this.parent.children.indexOf(this);
   }
-  updateKey() {
+  updateTreeSize(start, end, sign=1) {
+      let sum = 0;
+      if (this.isLeaf()) {
+          sum = end - start;
+      } else {
+          for (let i = start; i < end; i++) sum += this.children[i].treeSize;
+      }
+      if (!sum) return;
+      sum *= sign;
+      // Apply the sum change to this node and all its ancestors
       for (let node = this; node; node = node.parent) {
-          node.key = node.children[0].key;
+          node.treeSize += sum;
       }
   }
   wipe(start, end) {
+      this.updateTreeSize(start, end, -1);
       this.children.copyWithin(start, end, this.childCount);
       for (let i = this.childCount - end + start; i < this.childCount; i++) {
           this.children[i] = null;
@@ -46,13 +45,11 @@ class KeyValueNode {
       this.childCount -= end - start;
       // Reduce allocated size if possible
       if (this.childCount * 2 <= this.children.length) this.setCapacity(this.children.length / 2);
-      // Update key if first item changed
-      if (start === 0 && this.childCount > 0) this.updateKey();
   }
   moveFrom(neighbor, target, start, count=1) {
       // Note: `start` can have two meanings:
-      //   if neighbor is null, it is the value/KeyValueNode to move to the target
-      //   if neighbor is a KeyValueNode, it is the index from where value(s) have to be moved to the target
+      //   if neighbor is null, it is the value/Node to move to the target
+      //   if neighbor is a Node, it is the index from where value(s) have to be moved to the target
       // Make room in target node
       if (this.childCount + count > this.children.length) this.setCapacity(this.children.length * 2);
       this.children.copyWithin(target + count, target, Math.max(target + count, this.childCount));
@@ -67,14 +64,13 @@ class KeyValueNode {
       } else {
           this.children[target] = start; // start is value to insert
       }
+      this.updateTreeSize(target, target + count, 1);
       // Set parent link(s)
       if (!this.isLeaf()) {
           for (let i = 0; i < count; i++) {
               this.children[target + i].parent = this;
           }
       }
-      // Update key if first item changed
-      if (target === 0) this.updateKey();
   }
   moveToNext(count) {
       this.next.moveFrom(this, 0, this.childCount - count, count);
@@ -94,7 +90,7 @@ class KeyValueNode {
   }
   basicInsert(index, value) {
       this.moveFrom(null, index, value);
-      if (value instanceof KeyValueNode) {
+      if (value instanceof Node) {
           // Insert node in the level's linked list
           if (index > 0) {
               value.prev = this.children[index-1];
@@ -116,110 +112,47 @@ class KeyValueNode {
   }
 }
 
-class KeyValueTree {
-  constructor(nodeCapacity=16) {
+class Tree {
+  constructor(nodeCapacity=32) {
       this.nodeCapacity = nodeCapacity;
-      this.root = new KeyValueNode(1);
+      this.root = new Node(1);
       this.first = this.root; // Head of doubly linked list at bottom level
   }
-  locate(key) {
+  locate(offset) {
       let node = this.root;
-      let low;
+      // Normalise argument
+      offset = offset < 0 ? Math.max(0, node.treeSize + offset) : Math.min(offset, node.treeSize);
+
+      while (!node.isLeaf()) {
+          let index = 0;
+          let child = node.children[index];
+          while (offset > child.treeSize || offset === child.treeSize && child.next) {
+              offset -= child.treeSize;
+              child = node.children[++index];
+          }
+          node = child;
+      }
+      return [node, offset];
+  }
+  getItemAt(offset) {
+      let [node, index] = this.locate(offset);
+      if (index < node.childCount) return node.children[index];
+  }
+  setItemAt(offset, value) {
+      let [node, index] = this.locate(offset);
+      if (index < node.childCount) node.children[index] = value;
+  }
+  removeItemAt(offset) {
+      let [node, index] = this.locate(offset);
+      if (index >= node.childCount) return;
+
       while (true) {
-          // Binary search among keys
-          low = 1;
-          let high = node.childCount;
-          while (low < high) {
-              let index = (low + high) >> 1;
-              if (key >= node.children[index].key) {
-                  low = index + 1;
-              } else {
-                  high = index;
-              }
-          }
-          low--;
-          if (node.isLeaf()) break;
-          node = node.children[low];
-      }
-      if (low < node.childCount && key > node.children[low].key) return [node, low+1];
-      return [node, low];
-  }
-  get(key) {
-      let [node, index] = this.locate(key);
-      if (index < node.childCount) {
-          let keyValue = node.children[index];
-          if (keyValue.key === key) return keyValue.value;
-      }
-  }
-  set(key, value) {
-      let [node, index] = this.locate(key);
-      if (index < node.childCount && node.children[index].key === key) {
-          // already present: update the value
-          node.children[index].value = value;
-          return;
-      }
-      let item = new KeyValue(key, value); // item can be a KeyValue or a KeyValueNode
-      while (node.childCount === this.nodeCapacity) { // No room here
-          if (index === 0 && node.prev && node.prev.childCount < this.nodeCapacity) {
-              return node.prev.basicInsert(node.prev.childCount, item);
-          }
-          // Check whether we can redistribute (to avoid a split)
-          if (node !== this.root) {
-              let [left, right] = node.pairWithSmallest();
-              let joinedIndex = left === node ? index : left.childCount + index;
-              let sumCount = left.childCount + right.childCount + 1;
-              if (sumCount <= 2 * this.nodeCapacity) { // redistribute
-                  let childCount = sumCount >> 1;
-                  if (node === right) { // redistribute to the left
-                      let insertInLeft = joinedIndex < childCount;
-                      left.moveFromNext(childCount - left.childCount - +insertInLeft);
-                  } else { // redistribute to the right
-                      let insertInRight = index >= sumCount - childCount;
-                      left.moveToNext(childCount - right.childCount - +insertInRight);
-                  }
-                  if (joinedIndex > left.childCount ||
-                          joinedIndex === left.childCount && left.childCount > right.childCount) {
-                      right.basicInsert(joinedIndex - left.childCount, item);
-                  } else {
-                      left.basicInsert(joinedIndex, item);
-                  }
-                  return;
-              }
-          }
-          // Cannot redistribute: split node
-          let childCount = node.childCount >> 1;
-          // Create a new node that will later become the right sibling of this node
-          let sibling = new KeyValueNode(childCount);
-          // Move half of node node's data to it
-          sibling.moveFrom(node, 0, childCount, childCount);
-          // Insert the item in either the current node or the new one
-          if (index > node.childCount) {
-              sibling.basicInsert(index - node.childCount, item);
-          } else {
-              node.basicInsert(index, item);
-          }
-          // Is this the root?
-          if (!node.parent) {
-              // ...then first create a parent, which is the new root
-              this.root = new KeyValueNode(2);
-              this.root.basicInsert(0, node);
-          }
-          // Prepare for inserting the sibling node into the tree
-          index = node.index() + 1;
-          node = node.parent;
-          item = sibling;  // item is now a KeyValueNode
-      }
-      node.basicInsert(index, item);
-  }
-  remove(key) {
-      let [node, index] = this.locate(key);
-      if (index >= node.childCount || node.children[index].key !== key) return; // not found
-      while (true) {
+          console.assert(node.isLeaf() || node.children[index].treeSize === 0);
           node.basicRemove(index);
 
           // Exit when node's fill ratio is fine
           if (!node.parent || node.childCount * 2 > this.nodeCapacity) return;
-          // KeyValueNode has potentially too few children, we should either merge or redistribute
+          // Node has potentially too few children, we should either merge or redistribute
 
           let [left, right] = node.pairWithSmallest();
 
@@ -255,43 +188,62 @@ class KeyValueTree {
           index = right.index();
       }
   }
+  insertItemAt(offset, value) {
+      let [node, index] = this.locate(offset);
+      while (node.childCount === this.nodeCapacity) { // No room here
+          if (index === 0 && node.prev && node.prev.childCount < this.nodeCapacity) {
+              return node.prev.basicInsert(node.prev.childCount, value);
+          }
+          // Check whether we can redistribute (to avoid a split)
+          if (node !== this.root) {
+              let [left, right] = node.pairWithSmallest();
+              let joinedIndex = left === node ? index : left.childCount + index;
+              let sumCount = left.childCount + right.childCount + 1;
+              if (sumCount <= 2 * this.nodeCapacity) { // redistribute
+                  let childCount = sumCount >> 1;
+                  if (node === right) { // redistribute to the left
+                      let insertInLeft = joinedIndex < childCount;
+                      left.moveFromNext(childCount - left.childCount - +insertInLeft);
+                  } else { // redistribute to the right
+                      let insertInRight = index >= sumCount - childCount;
+                      left.moveToNext(childCount - right.childCount - +insertInRight);
+                  }
+                  if (joinedIndex > left.childCount ||
+                          joinedIndex === left.childCount && left.childCount > right.childCount) {
+                      right.basicInsert(joinedIndex - left.childCount, value);
+                  } else {
+                      left.basicInsert(joinedIndex, value);
+                  }
+                  return;
+              }
+          }
+          // Cannot redistribute: split node
+          let childCount = node.childCount >> 1;
+          // Create a new node that will later become the right sibling of this node
+          let sibling = new Node(childCount);
+          // Move half of node node's data to it
+          sibling.moveFrom(node, 0, childCount, childCount);
+          // Insert the value in either the current node or the new one
+          if (index > node.childCount) {
+              sibling.basicInsert(index - node.childCount, value);
+          } else {
+              node.basicInsert(index, value);
+          }
+          // Is this the root?
+          if (!node.parent) {
+              // ...then first create a parent, which is the new root
+              this.root = new Node(2);
+              this.root.basicInsert(0, node);
+          }
+          // Prepare for inserting the sibling node into the tree
+          index = node.index() + 1;
+          node = node.parent;
+          value = sibling;
+      }
+      node.basicInsert(index, value);
+  }
 }
 
-global.stone = stone
+module.exports = Tree
 
-stone.mount('@mount/drive-node/fs', ({ state }) => {
-  state.fs = require('fs')
-})
-
-stone.mount('@mount/drive-node/http', ({ state }) => {
-  state.http = require('http')
-  state.https = require('https')
-  state.http2 = require('http2')
-})
-
-stone.mount('@mount/drive-js/console', ({ state }) => {
-  state.console = console
-})
-
-stone.mount('@mount/start/force/store', ({ force }) => {
-  force.build = () => new Store
-  force.store = (store, block) => store.store(block)
-  force.fetch = (store, match) => store.fetch(match)
-  force.clear = (store, match) => store.clear(match)
-})
-
-stone.mount('@mount/start/store/stack', ({ force }) => {
-  force.build = () => new Stack
-  force.mount = (store, stack) => store.mount_stack(stack)
-  force.clear = (store, stack) => store.clear_stack(stack)
-})
-
-stone.mount('@mount/start/store/stack/cache', ({ force }) => {
-  force.build = (mount) => new Cache(mount)
-})
-
-stone.mount('@mount/start/store/weave', ({ force }) => {
-  force.build = () => new Weave()
-})
-
-{ build }
+Tree.Node = Node

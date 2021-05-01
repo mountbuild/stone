@@ -4,6 +4,7 @@ The stick classes are a set of B+tree classes implementing various B+trees for s
 - chain
 - latch
 - hatch
+- weave
 
 ## The chain stick
 
@@ -16,3 +17,7 @@ The latch stick is a key-only tree, like a set data structure.
 ## The hatch stick
 
 The hatch stick is a key-value tree, like a hash but instead using a tree.
+
+## The weave stick
+
+This is a combination of chain and hatch stick.

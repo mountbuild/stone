@@ -8,6 +8,5 @@ stack @mount/stone
   brand |Information|
   brand |Platform|
   brand |White Label|
-  trace |Lance Pollard <lp@elk.fm>|
-  stack ./stack
+  touch |Lance Pollard <lp@elk.fm>|
   mount ./mount

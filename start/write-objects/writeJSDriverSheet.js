@@ -7,9 +7,13 @@ const writeJSBlocks = require('./writeJSBlocks')
 
 function writeDriverSheet(sheet) {
   const arr = []
+  arr.push(`stone.mount('${sheet.sheet}', function(build){`)
+  arr.push(`  const force = build.force`)
   traverseEachForce(sheet).forEach(line => {
     arr.push(`  ${line}`)
   })
+  arr.push('})')
+  arr.push('')
   return arr.join('\n')
 }
 
@@ -37,7 +41,7 @@ function writeForceComment(trace, force) {
   const arr = []
   arr.push('')
   arr.push('/**')
-  const str = force.brand + ' ' + force.driveId
+  const str = force.brand
   arr.push(` * ${trace}#${str}`)
   arr.push(' */')
   return arr
@@ -51,7 +55,7 @@ function writeForceDefinition(build, force) {
   writeForceBody(build, force).forEach(str => {
     arr.push('  ' + str)
   })
-  arr.push('})')
+  arr.push('}')
   return arr
 }
 
@@ -62,8 +66,8 @@ function writeForceHeader(force) {
   force.start.forEach(mount => {
     fields.push(keys.shift())
   })
-  let name = `force_${force.brand.replace(/-/g, '_')}`
-  let arr = ['', `force(function ${name}(${fields.join(', ')}){`]
+  let name = `${force.brand.replace(/-/g, '_')}`
+  let arr = ['', `force.${name} = function(${fields.join(', ')}){`]
   // if debug
   // arr.push(`  console.log('${name}(' + Array.prototype.slice.call(arguments).join(', ') + ')')`)
   return arr
@@ -99,24 +103,24 @@ function writeLoopCount(build, cause, fields, names) {
 function writeCallUnaryFunction(build, cause, fields, names) {
   const arr = []
   const input = {
-    operation: null,
-    value: null
+    cause: null,
+    build: null
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.operation}${input.value}`)
+  arr.push(`${prefix}${input.cause}${input.build}`)
   return arr
 }
 
 function writeInvokeConstructor(build, cause, fields, names) {
   const arr = []
   const input = {
-    constructor: null,
-    factor: []
+    class: null,
+    build: []
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`return new ${input.constructor}(${input.factor.join(', ')})`)
+  arr.push(`return new ${input.class}(${input.build.join(', ')})`)
   return arr
 }
 
@@ -124,7 +128,7 @@ function writeApplyDelete(build, cause, fields, names) {
   const arr = []
   const input = {}
   buildInput(build, cause, input, fields)
-  arr.push(`delete ${input.object}[${input.aspect}]`)
+  arr.push(`delete ${input.block}[${input.state}]`)
   return arr
 }
 
@@ -132,7 +136,7 @@ function writeApplyDebug(build, cause, fields, names) {
   const arr = []
   const input = {}
   buildInput(build, cause, input, fields)
-  arr.push(`${input.keyword}`)
+  arr.push(`${input.brand}`)
   return arr
 }
 
@@ -141,7 +145,7 @@ function writeCallKeyword(build, cause, fields, names) {
   const input = {}
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.keyword} ${input.value || ''}`)
+  arr.push(`${prefix}${input.brand} ${input.build || ''}`)
   return arr
 }
 
@@ -150,7 +154,7 @@ function writeCallKeyword2(build, cause, fields, names) {
   const input = {}
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.left} ${input.keyword} ${input.right}`)
+  arr.push(`${prefix}${input.start} ${input.brand} ${input.front}`)
   return arr
 }
 
@@ -158,13 +162,13 @@ function writeCallTry(build, cause, fields, names) {
   const arr = []
   const input = {
     block: null,
-    error: null
+    fault: null
   }
   buildInput(build, cause, input, fields)
   arr.push(`try {`)
   arr.push(`  return ${input.block}()`)
   arr.push(`} catch (e) {`)
-  arr.push(`  return ${input.error}(e)`)
+  arr.push(`  return ${input.fault}(e)`)
   arr.push(`}`)
   return arr
 }
@@ -186,11 +190,11 @@ function writeApplyTest(build, cause, fields, names) {
   const arr = []
   const input = {
     check: null,
-    block: null
+    match: null
   }
   buildInput(build, cause, input, fields)
   arr.push(`if (${input.check}()) {`)
-  arr.push(`  return ${input.block}()`)
+  arr.push(`  return ${input.match}()`)
   arr.push(`}`)
   return arr
 }
@@ -199,14 +203,14 @@ function writeApplyTestElse(build, cause, fields, names) {
   const arr = []
   const input = {
     check: null,
-    block: null,
-    else: null
+    match: null,
+    fault: null
   }
   buildInput(build, cause, input, fields)
   arr.push(`if (${input.check}()) {`)
-  arr.push(`  return ${input.block}()`)
+  arr.push(`  return ${input.match}()`)
   arr.push(`} else {`)
-  arr.push(`  return ${input.else}()`)
+  arr.push(`  return ${input.fault}()`)
   arr.push(`}`)
   return arr
 }
@@ -214,78 +218,78 @@ function writeApplyTestElse(build, cause, fields, names) {
 function writeCreateLiteral(build, cause, fields, names) {
   const arr = []
   const input = {
-    literal: null
+    build: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`return ${input.literal}`)
+  arr.push(`return ${input.build}`)
   return arr
 }
 
 function writeSetAspect(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    aspect: null,
-    factor: null
+    block: null,
+    state: null,
+    build: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`${input.object}.${input.aspect} = ${input.factor}`)
+  arr.push(`${input.block}.${input.state} = ${input.build}`)
   return arr
 }
 
 function writeGetAspect(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    aspect: null
+    block: null,
+    state: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`return ${input.object}.${input.aspect}`)
+  arr.push(`return ${input.block}.${input.state}`)
   return arr
 }
 
 function writeSetDynamicAspect(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    aspect: null,
-    factor: null
+    block: null,
+    state: null,
+    build: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`${input.object}[${input.aspect}] = ${input.factor}`)
+  arr.push(`${input.block}[${input.state}] = ${input.build}`)
   return arr
 }
 
 function writeGetDynamicAspect(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    aspect: null
+    block: null,
+    state: null
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.object}[${input.aspect}]`)
+  arr.push(`${prefix}${input.block}[${input.state}]`)
   return arr
 }
 
 function writeGetVariable(build, cause, fields, names) {
   const arr = []
   const input = {
-    aspect: null
+    state: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`return ${input.aspect}`)
+  arr.push(`return ${input.state}`)
   return arr
 }
 
 function writeSetVariable(build, cause, fields, names) {
   const arr = []
   const input = {
-    aspect: null,
-    factor: null
+    state: null,
+    build: null
   }
   buildInput(build, cause, input, fields)
-  arr.push(`${input.aspect} = ${input.factor}`)
+  arr.push(`${input.state} = ${input.build}`)
   return arr
 }
 
@@ -328,7 +332,7 @@ function writeCause(build, fields, names, cause) {
         arr.push(str)
       })
       break
-    case 'throw-error':
+    case 'throw-fault':
       writeThrowError(build, cause, fields, names).forEach(str => {
         arr.push(str)
       })
@@ -455,26 +459,26 @@ function writeFooter(build) {
 function writeCallBinaryFunction(build, cause, fields, names) {
   const arr = []
   const input = {
-    left: null,
-    operation: null,
-    right: null
+    start: null,
+    cause: null,
+    front: null
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.left} ${input.operation} ${input.right}`)
+  arr.push(`${prefix}${input.start} ${input.cause} ${input.front}`)
   return arr
 }
 
 function writeCallDynamicFunction(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    aspect: null,
-    factor: []
+    block: null,
+    state: null,
+    build: []
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.object}[${input.aspect}](${input.factor.join(', ')})`)
+  arr.push(`${prefix}${input.block}[${input.state}](${input.build.join(', ')})`)
   return arr
 }
 
@@ -482,34 +486,34 @@ function writeCallFunction(build, cause, fields, names) {
   const arr = []
   const input = {
     force: null,
-    factor: []
+    build: []
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.force}(${input.factor.join(', ')})`)
+  arr.push(`${prefix}${input.force}(${input.build.join(', ')})`)
   return arr
 }
 
 function writeCallMethod(build, cause, fields, names) {
   const arr = []
   const input = {
-    object: null,
-    method: null,
-    factor: []
+    block: null,
+    cause: null,
+    build: []
   }
   buildInput(build, cause, input, fields)
   const prefix = fetchPrefix(cause, fields, names)
-  arr.push(`${prefix}${input.object}.${input.method}(${input.factor.join(', ')})`)
+  arr.push(`${prefix}${input.block}.${input.cause}(${input.build.join(', ')})`)
   return arr
 }
 
 function writeThrowError(build, cause, fields, names) {
   const arr = []
   const input = {
-    factor: []
+    build: []
   }
   buildInput(build, cause, input, fields)
-  arr.push(`throw ${input.factor.join(', ')}`)
+  arr.push(`throw ${input.build.join(', ')}`)
   return arr
 }
 

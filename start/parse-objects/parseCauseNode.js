@@ -3,10 +3,10 @@ const parseStateFieldNode = require('./parseStateFieldNode')
 const parseBuildValue = require('./parseBuildValue')
 const shared = require('../shared')
 
-function parseCauseNode(sheet, verse) {
+function parseCauseNode(sheet, verse, type) {
   const brand = shared.getBrandFromFirst(verse)
   const cause = {
-    field: `cause`,
+    field: type || `cause`,
     force: brand,
     mount: [],
     catch: {}
@@ -17,6 +17,10 @@ function parseCauseNode(sheet, verse) {
       case 'mount':
         const mount = parseCause_mount(sheet, verse)
         cause.mount.push(mount)
+        break
+      case 'chain':
+        const chain = parseCause_chain(sheet, verse)
+        cause.mount.push(chain)
         break
       case 'catch':
         _catch = parseCause_catch(sheet, verse)
@@ -45,6 +49,17 @@ function parseCauseNode(sheet, verse) {
 module.exports = parseCauseNode
 
 function parseCause_mount(sheet, verse) {
+  const brand = shared.getPathFromFirst(verse)
+  const build = parseBuildValue(sheet, verse.verse[1])
+  const mount = {
+    field: `cause-mount`,
+    brand,
+    build
+  }
+  return mount
+}
+
+function parseCause_chain(sheet, verse) {
   const brand = shared.getPathFromFirst(verse)
   const build = parseBuildValue(sheet, verse.verse[1])
   const mount = {

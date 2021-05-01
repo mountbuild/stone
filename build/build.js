@@ -1,3171 +1,2537 @@
 
-function stone() {
+const global = typeof window == 'undefined' ? global : window
 
-  let SLICE = 1
+class KeyValue {
+  constructor(key, value) {
+      this.key = key;
+      this.value = value;
+  }
+}
 
-  /**
-   * Create a 16KB slot of memory for our system to start.
-   */
-
-  const MOUNT = new Uint32Array([
-    0x00100, 0x0001c, 0x00024, 0x0002c, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00008, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00020, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00002, 0x00005, 0x00023, 0x00000, 0x00010, 0x0000b, 0x00009, 0x00068,
-    0x00000, 0x00001, 0x00000, 0x00002, 0x00004, 0x00000, 0x0000b, 0x00009,
-    0x00068, 0x00000, 0x00003, 0x00003, 0x00000, 0x00004, 0x00001, 0x0000b,
-    0x00009, 0x00068, 0x00000, 0x0000a, 0x00000, 0x00014, 0x00004, 0x00003,
-    0x0000b, 0x00009, 0x0006b, 0x00003, 0x00001, 0x00003, 0x00000, 0x00004,
-    0x00002, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00000, 0x00002, 0x00005,
-    0x000a2, 0x00003, 0x00001, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00002,
-    0x00002, 0x00005, 0x000a2, 0x00003, 0x00003, 0x00002, 0x00005, 0x000a2,
-    0x00003, 0x00000, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00001, 0x00002,
-    0x00005, 0x000a2, 0x00003, 0x00002, 0x00002, 0x00005, 0x000a2, 0x00003,
-    0x00003, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00000, 0x00002, 0x00005,
-    0x000a2, 0x00003, 0x00001, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00002,
-    0x00002, 0x00005, 0x000a2, 0x00003, 0x00003, 0x00002, 0x00005, 0x000a2,
-    0x00003, 0x00000, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00001, 0x00002,
-    0x00005, 0x000a2, 0x00003, 0x00002, 0x00002, 0x00005, 0x000a2, 0x00003,
-    0x00003, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00000, 0x00002, 0x00005,
-    0x000a2, 0x00003, 0x00001, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00002,
-    0x00002, 0x00005, 0x000a2, 0x00003, 0x00003, 0x00002, 0x00005, 0x000a2,
-    0x00003, 0x00000, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00001, 0x00002,
-    0x00005, 0x000a2, 0x00003, 0x00002, 0x00002, 0x00005, 0x000a2, 0x00003,
-    0x00003, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00000, 0x00002, 0x00005,
-    0x000a2, 0x00003, 0x00001, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00002,
-    0x00002, 0x00005, 0x000a2, 0x00003, 0x00003, 0x00002, 0x00005, 0x000a2,
-    0x00003, 0x00000, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00001, 0x00002,
-    0x00005, 0x000a2, 0x00003, 0x00002, 0x00002, 0x00005, 0x000a2, 0x00003,
-    0x00003, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00000, 0x00002, 0x00005,
-    0x000a2, 0x00003, 0x00001, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00002,
-    0x00002, 0x00005, 0x000a2, 0x00003, 0x00003, 0x00002, 0x00005, 0x000a2,
-    0x00003, 0x00000, 0x00002, 0x00005, 0x000a2, 0x00003, 0x00001, 0x00002,
-    0x00005, 0x000a2, 0x00003, 0x00002, 0x00002, 0x00005, 0x000a2, 0x00003,
-    0x00003, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000,
-    0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000, 0x00000
-  ])
-
-  /**
-   * The native elements.
-   */
-
-  const BUILD = [[]]
-
-  /**
-   * The native functions or "system calls".
-   */
-
-  const FORCE = []
-
-  /**
-   * What you get back.
-   */
-
-  const STORE = [MOUNT, BUILD, FORCE]
-
-  /**
-   * The start of the stack chain.
-   */
-
-  const STACK_START = 0
-
-  /**
-   * The active stack.
-   */
-
-  const STACK_MOUNT = 1
-
-  /**
-   * The next call.
-   */
-
-  const FRONT = 0
-
-  const STACK = 1
-  const STICK = 2
-  const DRIVE = 3 // chain
-
-  /**
-   * The timestamp when we started the next main loop.
-   */
-
-  const CLOCK_START = 10
-
-  /**
-   * The timestamp when we completed a block of the main loop.
-   */
-
-  const CLOCK_FRONT = 4
-
-  /**
-   * The maximum number of milliseconds before we
-   * start a new loop in the main loop.
-   */
-
-   const CLOCK_CREST = 5
-
-  /**
-   * Whether or not we have surpassed the max time
-   * for the main loop, so we know when to exit.
-   */
-
-  const CLOCK_LATCH = 6
-
-  /**
-   * The maximum number of loops in the main loop.
-   */
-
-  const SHIFT_CREST = 7
-
-  /**
-   * The total number of iterations in the main loop,
-   * so we know when to finish up.
-   */
-
-  const SHIFT_COUNT = 8
-
-  /**
-   * A flag saying whether or not we jumped to a new call,
-   * or we jump over the current action to the next action
-   * in sequence.
-   */
-
-  const SHIFT = 9
-
-  /**
-   * This is the index to the setImmediate function.
-   */
-
-  const CAUSE_VAULT = 32
-
-  /**
-   * This is the initial value of the SHIFT flag.
-   */
-
-  const SHIFT_CLEAR = 0
-
-  /**
-   * Start processing.
-   */
-
-  force(function(){
-    MOUNT[CLOCK_CREST] = 8
-    MOUNT[CLOCK_START] = Date.now()
-    MOUNT[CLOCK_LATCH] = 0
-    MOUNT[SHIFT_CREST] = 65536
-    MOUNT[SHIFT_COUNT] = 0
-
-    /**
-     * If we haven't reached the time limit,
-     * then do one more block of loops.
-     */
-
-    while (!MOUNT[CLOCK_LATCH]) {
-
-      /**
-       * If we haven't reached the limit of
-       * iteraction per clock cycle, then do one more loop.
-       */
-
-      while (MOUNT[SHIFT_COUNT] < MOUNT[SHIFT_CREST]) {
-
-        /**
-         * Find the next cause in the sequence.
-         */
-
-        const front = MOUNT[FRONT]
-
-        /**
-         * Increment iteration counter.
-         */
-
-        MOUNT[SHIFT_COUNT]++
-
-        /**
-         * Get the cause index.
-         */
-
-        const slate = MOUNT[front]
-
-        if (!slate) {
-          return
-        }
-
-        /**
-         * Get the cause.
-         */
-
-        const cause = FORCE[slate]
-
-        const pad = String(MOUNT[SHIFT_COUNT]).padStart(5, ' ')
-        console.log(`${pad}. ${cause.name}()`)
-        SLICE++
-
-        /**
-         * Invoke the cause.
-         */
-
-        cause()
-
-        /**
-         * That stack function could have
-         * caused a jump to a new function.
-         */
-
-        if (MOUNT[SHIFT]) {
-
-          /**
-           * Reset the jump flag if we jumped.
-           */
-
-          MOUNT[SHIFT] = SHIFT_CLEAR
-        } else {
-
-          /**
-           * Otherwise, just jump to the next
-           * mount build action in sequence.
-           */
-
-          MOUNT[FRONT] += MOUNT[front + 1]
-        }
-
-        SLICE--
+class KeyValueNode {
+  constructor(capacity) {
+      // Mimic fixed-size array (avoid accidentally growing it)
+      this.children = Object.seal(Array(capacity).fill(null));
+      this.childCount = 0; // Number of used slots in children array
+      // The algorithm relies on that fact that both KeyValue & KeyValueNode have a key property:
+      this.key = null; // Here it is a property for supporting a search
+      // Maintain back-link to parent.
+      this.parent = null;
+      // Per level in the tree, maintain a doubly linked list
+      this.prev = this.next = null;
+  }
+  setCapacity(capacity) {
+      if (capacity < 1) return;
+      // Here we make a new array, and copy the data into it
+      let children = Object.seal(Array(capacity).fill(null));
+      for (let i = 0; i < this.childCount; i++) children[i] = this.children[i];
+      this.children = children;
+  }
+  isLeaf() {
+      return !(this.children[0] instanceof KeyValueNode);
+  }
+  index() {
+      return this.parent.children.indexOf(this);
+  }
+  updateKey() {
+      for (let node = this; node; node = node.parent) {
+          node.key = node.children[0].key;
       }
+  }
+  wipe(start, end) {
+      this.children.copyWithin(start, end, this.childCount);
+      for (let i = this.childCount - end + start; i < this.childCount; i++) {
+          this.children[i] = null;
+      }
+      this.childCount -= end - start;
+      // Reduce allocated size if possible
+      if (this.childCount * 2 <= this.children.length) this.setCapacity(this.children.length / 2);
+      // Update key if first item changed
+      if (start === 0 && this.childCount > 0) this.updateKey();
+  }
+  moveFrom(neighbor, target, start, count=1) {
+      // Note: `start` can have two meanings:
+      //   if neighbor is null, it is the value/KeyValueNode to move to the target
+      //   if neighbor is a KeyValueNode, it is the index from where value(s) have to be moved to the target
+      // Make room in target node
+      if (this.childCount + count > this.children.length) this.setCapacity(this.children.length * 2);
+      this.children.copyWithin(target + count, target, Math.max(target + count, this.childCount));
+      this.childCount += count;
+      if (neighbor !== null) {
+          // Copy the children
+          for (let i = 0; i < count; i++) {
+              this.children[target + i] = neighbor.children[start + i];
+          }
+          // Remove the original references
+          neighbor.wipe(start, start + count);
+      } else {
+          this.children[target] = start; // start is value to insert
+      }
+      // Set parent link(s)
+      if (!this.isLeaf()) {
+          for (let i = 0; i < count; i++) {
+              this.children[target + i].parent = this;
+          }
+      }
+      // Update key if first item changed
+      if (target === 0) this.updateKey();
+  }
+  moveToNext(count) {
+      this.next.moveFrom(this, 0, this.childCount - count, count);
+  }
+  moveFromNext(count) {
+      this.moveFrom(this.next, this.childCount, 0, count);
+  }
+  basicRemove(index) {
+      if (!this.isLeaf()) {
+          // Take node out of the level's linked list
+          let prev = this.children[index].prev;
+          let next = this.children[index].next;
+          if (prev) prev.next = next;
+          if (next) next.prev = prev;
+      }
+      this.wipe(index, index + 1);
+  }
+  basicInsert(index, value) {
+      this.moveFrom(null, index, value);
+      if (value instanceof KeyValueNode) {
+          // Insert node in the level's linked list
+          if (index > 0) {
+              value.prev = this.children[index-1];
+              value.next = value.prev.next;
+          } else if (this.childCount > 1) {
+              value.next = this.children[1];
+              value.prev = value.next.prev;
+          }
+          if (value.prev) value.prev.next = value;
+          if (value.next) value.next.prev = value;
+      }
+  }
+  pairWithSmallest() {
+      return this.prev && (!this.next || this.next.childCount > this.prev.childCount)
+          ? [this.prev, this] : [this, this.next];
+  }
+  toString() {
+      return "[" + this.children.map(v => v??"-").join() + "]";
+  }
+}
 
-      MOUNT[CLOCK_FRONT] = Date.now()
-      const clock_start = MOUNT[CLOCK_START]
-      const clock_front = MOUNT[CLOCK_FRONT]
-      const clock_crest = MOUNT[CLOCK_CREST]
-      const clock_shift = clock_front - clock_start
-      const clock_latch = clock_shift > clock_crest
-      MOUNT[CLOCK_LATCH] = clock_latch
-    }
+class KeyValueTree {
+  constructor(nodeCapacity=16) {
+      this.nodeCapacity = nodeCapacity;
+      this.root = new KeyValueNode(1);
+      this.first = this.root; // Head of doubly linked list at bottom level
+  }
+  locate(key) {
+      let node = this.root;
+      let low;
+      while (true) {
+          // Binary search among keys
+          low = 1;
+          let high = node.childCount;
+          while (low < high) {
+              let index = (low + high) >> 1;
+              if (key >= node.children[index].key) {
+                  low = index + 1;
+              } else {
+                  high = index;
+              }
+          }
+          low--;
+          if (node.isLeaf()) break;
+          node = node.children[low];
+      }
+      if (low < node.childCount && key > node.children[low].key) return [node, low+1];
+      return [node, low];
+  }
+  get(key) {
+      let [node, index] = this.locate(key);
+      if (index < node.childCount) {
+          let keyValue = node.children[index];
+          if (keyValue.key === key) return keyValue.value;
+      }
+  }
+  set(key, value) {
+      let [node, index] = this.locate(key);
+      if (index < node.childCount && node.children[index].key === key) {
+          // already present: update the value
+          node.children[index].value = value;
+          return;
+      }
+      let item = new KeyValue(key, value); // item can be a KeyValue or a KeyValueNode
+      while (node.childCount === this.nodeCapacity) { // No room here
+          if (index === 0 && node.prev && node.prev.childCount < this.nodeCapacity) {
+              return node.prev.basicInsert(node.prev.childCount, item);
+          }
+          // Check whether we can redistribute (to avoid a split)
+          if (node !== this.root) {
+              let [left, right] = node.pairWithSmallest();
+              let joinedIndex = left === node ? index : left.childCount + index;
+              let sumCount = left.childCount + right.childCount + 1;
+              if (sumCount <= 2 * this.nodeCapacity) { // redistribute
+                  let childCount = sumCount >> 1;
+                  if (node === right) { // redistribute to the left
+                      let insertInLeft = joinedIndex < childCount;
+                      left.moveFromNext(childCount - left.childCount - +insertInLeft);
+                  } else { // redistribute to the right
+                      let insertInRight = index >= sumCount - childCount;
+                      left.moveToNext(childCount - right.childCount - +insertInRight);
+                  }
+                  if (joinedIndex > left.childCount ||
+                          joinedIndex === left.childCount && left.childCount > right.childCount) {
+                      right.basicInsert(joinedIndex - left.childCount, item);
+                  } else {
+                      left.basicInsert(joinedIndex, item);
+                  }
+                  return;
+              }
+          }
+          // Cannot redistribute: split node
+          let childCount = node.childCount >> 1;
+          // Create a new node that will later become the right sibling of this node
+          let sibling = new KeyValueNode(childCount);
+          // Move half of node node's data to it
+          sibling.moveFrom(node, 0, childCount, childCount);
+          // Insert the item in either the current node or the new one
+          if (index > node.childCount) {
+              sibling.basicInsert(index - node.childCount, item);
+          } else {
+              node.basicInsert(index, item);
+          }
+          // Is this the root?
+          if (!node.parent) {
+              // ...then first create a parent, which is the new root
+              this.root = new KeyValueNode(2);
+              this.root.basicInsert(0, node);
+          }
+          // Prepare for inserting the sibling node into the tree
+          index = node.index() + 1;
+          node = node.parent;
+          item = sibling;  // item is now a KeyValueNode
+      }
+      node.basicInsert(index, item);
+  }
+  remove(key) {
+      let [node, index] = this.locate(key);
+      if (index >= node.childCount || node.children[index].key !== key) return; // not found
+      while (true) {
+          node.basicRemove(index);
 
-    FORCE[CAUSE_VAULT](FORCE[0])
-  })
+          // Exit when node's fill ratio is fine
+          if (!node.parent || node.childCount * 2 > this.nodeCapacity) return;
+          // KeyValueNode has potentially too few children, we should either merge or redistribute
 
+          let [left, right] = node.pairWithSmallest();
+
+          if (!left || !right) { // A node with no siblings? Must become the root!
+              this.root = node;
+              node.parent = null;
+              return;
+          }
+          let sumCount = left.childCount + right.childCount;
+          let childCount = sumCount >> 1;
+
+          // Check whether to merge or to redistribute
+          if (sumCount > this.nodeCapacity) { // redistribute
+              // Move some data from the bigger to the smaller node
+              let shift = childCount - node.childCount;
+              if (!shift) { // Boundary case: when a redistribution would bring no improvement
+                  console.assert(node.childCount * 2 === this.nodeCapacity && sumCount === this.nodeCapacity + 1);
+                  return;
+              }
+              if (node === left) { // move some children from right to left
+                  left.moveFromNext(shift);
+              } else { // move some children from left to right
+                  left.moveToNext(shift);
+              }
+              return;
+          }
+
+          // Merge:
+          // Move all data from the right to the left
+          left.moveFromNext(right.childCount);
+          // Prepare to delete right node
+          node = right.parent;
+          index = right.index();
+      }
+  }
+}
+
+global.stone = stone
+
+stone.mount('@mount/drive-node/fs', ({ state }) => {
+  state.fs = require('fs')
+})
+
+stone.mount('@mount/drive-node/http', ({ state }) => {
+  state.http = require('http')
+  state.https = require('https')
+  state.http2 = require('http2')
+})
+
+stone.mount('@mount/drive-js/console', ({ state }) => {
+  state.console = console
+})
+
+stone.mount('@mount/start/force/store', ({ force }) => {
+  force.build = () => new Store
+  force.store = (store, block) => store.store(block)
+  force.fetch = (store, match) => store.fetch(match)
+  force.clear = (store, match) => store.clear(match)
+})
+
+stone.mount('@mount/start/store/stack', ({ force }) => {
+  force.build = () => new Stack
+  force.mount = (store, stack) => store.mount_stack(stack)
+  force.clear = (store, stack) => store.clear_stack(stack)
+})
+
+stone.mount('@mount/start/store/stack/cache', ({ force }) => {
+  force.build = (mount) => new Cache(mount)
+})
+
+stone.mount('@mount/start/store/weave', ({ force }) => {
+  force.build = () => new Weave()
+})
+
+stone.mount('@mount/drive-js', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-js/mount', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-js/javascript/base', function(build){
+  const force = build.force
+  
   /**
-   * Call with zero inputs and no return.
-   */
-
-  force(function mount_0(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const cause = FORCE[force_00000]
-    CAUSE(cause)
-  })
-
-  /**
-   * Call with 1 input and no return.
-   */
-
-  force(function mount_1(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const state_00001 = MOUNT[front + 4]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(cause, fetch_00001, state_00001)
-  })
-
-  force(function mount_2(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002
-    )
-  })
-
-  force(function mount_3(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const fetch_00003 = FORCE[force_00003 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003
-    )
-  })
-
-  force(function(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const fetch_00003 = FORCE[force_00003 + 24]
-    const fetch_00004 = FORCE[force_00004 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004
-    )
-  })
-
-  force(function(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const fetch_00003 = FORCE[force_00003 + 24]
-    const fetch_00004 = FORCE[force_00004 + 24]
-    const fetch_00005 = FORCE[force_00005 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005
-    )
-  })
-
-  force(function(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const force_00006 = MOUNT[front + 13]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const state_00006 = MOUNT[front + 14]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const fetch_00003 = FORCE[force_00003 + 24]
-    const fetch_00004 = FORCE[force_00004 + 24]
-    const fetch_00005 = FORCE[force_00005 + 24]
-    const fetch_00006 = FORCE[force_00006 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005,
-      fetch_00006, state_00006
-    )
-  })
-
-  force(function(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const force_00006 = MOUNT[front + 13]
-    const force_00007 = MOUNT[front + 15]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const state_00006 = MOUNT[front + 14]
-    const state_00007 = MOUNT[front + 16]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const fetch_00003 = FORCE[force_00003 + 24]
-    const fetch_00004 = FORCE[force_00004 + 24]
-    const fetch_00005 = FORCE[force_00005 + 24]
-    const fetch_00006 = FORCE[force_00006 + 24]
-    const fetch_00007 = FORCE[force_00007 + 24]
-    const cause = FORCE[force_00000]
-    CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005,
-      fetch_00006, state_00006,
-      fetch_00007, state_00007
-    )
-  })
-
-  force(function mount_0_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const store = FORCE[force_00001 + 24]
-    const slate = MOUNT[front + 4]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_1_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const state_00001 = MOUNT[front + 4]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const store = FORCE[force_00002 + 24]
-    const slate = MOUNT[front + 6]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_2_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const fetch_00001 = FORCE[force_00001 + 24]
-    const fetch_00002 = FORCE[force_00002 + 24]
-    const store = FORCE[force_00003 + 24]
-    const slate = MOUNT[front + 8]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_3_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const fetch_00001 = FORCE[force_00001]
-    const fetch_00002 = FORCE[force_00002]
-    const fetch_00003 = FORCE[force_00003]
-    const store = FORCE[force_00004 + 24]
-    const slate = MOUNT[front + 10]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_4_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const fetch_00001 = FORCE[force_00001]
-    const fetch_00002 = FORCE[force_00002]
-    const fetch_00003 = FORCE[force_00003]
-    const fetch_00004 = FORCE[force_00004]
-    const store = FORCE[force_00005 + 24]
-    const slate = MOUNT[front + 12]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_5_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const force_00006 = MOUNT[front + 13]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const fetch_00001 = FORCE[force_00001]
-    const fetch_00002 = FORCE[force_00002]
-    const fetch_00003 = FORCE[force_00003]
-    const fetch_00004 = FORCE[force_00004]
-    const fetch_00005 = FORCE[force_00005]
-    const store = FORCE[force_00006 + 24]
-    const slate = MOUNT[front + 14]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_6_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const force_00006 = MOUNT[front + 13]
-    const force_00007 = MOUNT[front + 15]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const state_00006 = MOUNT[front + 14]
-    const fetch_00001 = FORCE[force_00001]
-    const fetch_00002 = FORCE[force_00002]
-    const fetch_00003 = FORCE[force_00003]
-    const fetch_00004 = FORCE[force_00004]
-    const fetch_00005 = FORCE[force_00005]
-    const fetch_00006 = FORCE[force_00006]
-    const store = FORCE[force_00007 + 24]
-    const slate = MOUNT[front + 16]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005,
-      fetch_00006, state_00006
-    )
-    WRITE(store, build, slate)
-  })
-
-  force(function mount_7_shift(){
-    const front = MOUNT[FRONT]
-    const force_00000 = MOUNT[front + 2]
-    const force_00001 = MOUNT[front + 3]
-    const force_00002 = MOUNT[front + 5]
-    const force_00003 = MOUNT[front + 7]
-    const force_00004 = MOUNT[front + 9]
-    const force_00005 = MOUNT[front + 11]
-    const force_00006 = MOUNT[front + 13]
-    const force_00007 = MOUNT[front + 15]
-    const force_00008 = MOUNT[front + 15]
-    const state_00001 = MOUNT[front + 4]
-    const state_00002 = MOUNT[front + 6]
-    const state_00003 = MOUNT[front + 8]
-    const state_00004 = MOUNT[front + 10]
-    const state_00005 = MOUNT[front + 12]
-    const state_00006 = MOUNT[front + 14]
-    const state_00007 = MOUNT[front + 16]
-    const fetch_00001 = FORCE[force_00001]
-    const fetch_00002 = FORCE[force_00002]
-    const fetch_00003 = FORCE[force_00003]
-    const fetch_00004 = FORCE[force_00004]
-    const fetch_00005 = FORCE[force_00005]
-    const fetch_00006 = FORCE[force_00006]
-    const fetch_00007 = FORCE[force_00007]
-    const store = FORCE[force_00008 + 24]
-    const slate = MOUNT[front + 18]
-    const cause = FORCE[force_00000]
-    const build = CAUSE(
-      cause,
-      fetch_00001, state_00001,
-      fetch_00002, state_00002,
-      fetch_00003, state_00003,
-      fetch_00004, state_00004,
-      fetch_00005, state_00005,
-      fetch_00006, state_00006,
-      fetch_00007, state_00007
-    )
-    WRITE(store, build, slate)
-  })
-
-
-  force(function shift_match(s, h, o){
-    if (s === h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  force(function shift_shift_match(s, h, o){
-    if (s !== h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  force(function shift_crest(s, h, o){
-    if (s > h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  force(function shift_floor(s, h, o){
-    if (s < h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  /**
-   * Jump gte.
-   */
-
-  force(function(s, h, o){
-    if (s >= h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  /**
-   * Jump lte.
-   */
-
-  force(function(s, h, o){
-    if (s <= h) {
-      MOUNT[FRONT] = o
-      MOUNT[SHIFT] = 1
-    }
-  })
-
-  /**
-   * Jump.
-   */
-
-  force(function shift(s){
-    MOUNT[FRONT] = s
-    MOUNT[SHIFT] = 1
-  })
-
-  /**
-   * fetch
-   */
-
-  force(function fetch(s){
-    return s
-  })
-
-  /**
-   * fetch-mount
-   */
-
-  force(function fetch_mount(s){
-    return MOUNT[s]
-  })
-
-  /**
-   * fetch-build
-   */
-
-  force(function fetch_build(s){
-    return BUILD[s]
-  })
-
-  /**
-   * fetch-mount
-   */
-
-  force(function fetch_mount_stack(s){
-    // stack=<scale><crest><shift><values...>
-    const stack = MOUNT[STACK]
-    return MOUNT[stack + s + 3]
-  })
-
-  /**
-   * store-mount-build
-   */
-
-  force(function store_mount_state(s, h){
-    const stack = MOUNT[STACK]
-    MOUNT[stack + h + 3] = s
-  })
-
-  /**
-   * store-stack-mount-build
-   */
-
-  force(function store_mount_state_2(s, h){
-    const stack = MOUNT[STACK]
-    MOUNT[stack + s + 3] = h
-  })
-
-  /**
-   * store-stick-mount-build
-   */
-
-  force(function(s, h, o){
-    let stick = MOUNT[STICK]
-    while (s) {
-      stick = MOUNT[stick]
-      s--
-    }
-    const slate = MOUNT[stick + 1]
-    const store = BUILD[slate]
-    store[h] = o
-  })
-
-  /**
-   * store-stack-share-mount
-   */
-
-   force(function(s, h){
-    const stack = MOUNT[STACK]
-    MOUNT[stack + s] = MOUNT[h]
-  })
-
-  /**
-   * store-stick-share-mount
-   */
-
-  force(function(s, h, o){
-    throw 'oops'
-  })
-
-  /**
-   * store-mount-share-build
-   */
-
-  force(function store_mount_share_build(s, h){
-    MOUNT[s] = BUILD[h]
-  })
-
-  /**
-   * store-build-share-mount
-   */
-
-  force(function store_build_share_mount(s, h){
-    BUILD[s] = MOUNT[h]
-  })
-
-  /**
-   * Push activation record.
-   *
-   * mount-stack
-   */
-
-  force(function mount_stack(s){
-
-    /**
-     * Get the last drive address.
-     */
-
-    const crest = MOUNT[STACK]
-
-    /**
-     * Increment the drive pointer by however
-     * large the last was.
-     */
-
-    MOUNT[STACK] += MOUNT[crest]
-
-    /**
-     * Now the new position is where the drive starts.
-     */
-
-    const start = MOUNT[STACK]
-
-    /**
-     * Set the size of the drive to what we passed in.
-     */
-
-    MOUNT[start] = s
-
-    /**
-     * And set the pointer to the parent drive.
-     * This is used for lookup.
-     */
-
-    MOUNT[start + 1] = crest
-  })
-
-  /**
-   * Pop activation record.
-   *
-   * clear-stack
-   */
-
-  force(function clear_stack(){
-
-    /**
-     * Get the front of the stack.
-     */
-
-    const start = MOUNT[STACK]
-
-    /**
-     * Get the return address.
-     */
-
-    const shift = MOUNT[start + 2]
-
-    /**
-     * Redirect back to the return address.
-     */
-
-    MOUNT[FRONT] = shift
-
-    /**
-     * Get the size of the activation record.
-     */
-
-    const crest = MOUNT[start + 1]
-
-    /**
-     * Get scale from crest.
-     */
-
-    const scale = MOUNT[crest]
-
-    /**
-     * Decrement by that value.
-     */
-
-    MOUNT[STACK] -= scale
-  })
-
-  /**
-   * Call a function but also pass the return address.
-   */
-
-  force(function cause(s){
-
-    /**
-     * Get the current stack pointer.
-     */
-
-    const drive = MOUNT[STACK]
-
-    /**
-     * Set the return address to the next cause
-     * in the sequence.
-     */
-
-    MOUNT[drive + 2] = MOUNT[FRONT] + 2
-
-    /**
-     * Then jump to what was provided.
-     */
-
-    MOUNT[FRONT] = s
-  })
-
-  /**
-   * Store in a place in native memory.
-   */
-
-  force(function(s, h, o){
-    let house = MOUNT[SLACK]
-    while (s) {
-      house = MOUNT[house]
-      s--
-    }
-    let store = BUILD[house]
-    let build = store[h]
-    let stack = MOUNT[STACK]
-    MOUNT[stack + o] = build
-  })
-
-  /**
-   * Clear a place in native memory.
-   */
-
-  force(function(s){
-
-  })
-
-  force(function(){
-    let front = MOUNT[FRONT] + 2
-    const count = MOUNT[front]
-    const chain = new Array(count)
-    front++
-    let bound = 0
-    while (bound < count) {
-      const mount = bound / 4
-      const block = MOUNT[front + mount]
-      const a = block & 0x000000ff
-      const b = (block & 0x0000ff00) >> 8
-      const c = (block & 0x00ff0000) >> 16
-      const d = (block & 0xff000000) >> 24
-      chain[bound] = String.fromCharCode(a)
-      chain[bound + 1] = String.fromCharCode(b)
-      chain[bound + 2] = String.fromCharCode(c)
-      chain[bound + 3] = String.fromCharCode(d)
-      bound += 4
-    }
-  })
-    
-  /**
-   * @mount/drive/javascript/binding/base#drive 1
+   * @mount/drive-js/javascript/base#drive
    */
   
-  force(function force_drive(s, h){
+  force.drive = function(s, h){
     while (s()) {
       h()
     }
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check 2
+   * @mount/drive-js/javascript/base#check
    */
   
-  force(function force_check(s, h){
+  force.check = function(s, h){
     if (s()) {
       return h()
     }
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-else 3
+   * @mount/drive-js/javascript/base#check-else
    */
   
-  force(function force_check_else(s, h, o){
+  force.check_else = function(s, h, o){
     if (s()) {
       return h()
     } else {
       return o()
     }
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#debug-function 4
+   * @mount/drive-js/javascript/base#debug-function
    */
   
-  force(function force_debug_function(s){
+  force.debug_function = function(s){
     window.debug(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#debug 5
+   * @mount/drive-js/javascript/base#debug
    */
   
-  force(function force_debug(){
+  force.debug = function(){
     debugger
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#queue 6
+   * @mount/drive-js/javascript/base#queue
    */
   
-  force(function force_queue(s){
+  force.queue = function(s){
     window.setImmediate(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#compute-bitwise-or 7
+   * @mount/drive-js/javascript/base#compute-bitwise-or
    */
   
-  force(function force_compute_bitwise_or(s, h){
+  force.compute_bitwise_or = function(s, h){
     return s | h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-if-equal 8
+   * @mount/drive-js/javascript/base#check-if-equal
    */
   
-  force(function force_check_if_equal(s, h){
+  force.check_if_equal = function(s, h){
     return s == h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-if-strictly-equal 9
+   * @mount/drive-js/javascript/base#check-if-strictly-equal
    */
   
-  force(function force_check_if_strictly_equal(s, h){
+  force.check_if_strictly_equal = function(s, h){
     return s === h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#get-typeof 10
+   * @mount/drive-js/javascript/base#get-typeof
    */
   
-  force(function force_get_typeof(s){
+  force.get_typeof = function(s){
     return typeof s
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#get-instanceof 11
+   * @mount/drive-js/javascript/base#get-instanceof
    */
   
-  force(function force_get_instanceof(s, h){
+  force.get_instanceof = function(s, h){
     return s instanceof h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#set-field 12
+   * @mount/drive-js/javascript/base#set-field
    */
   
-  force(function force_set_field(s, h, o){
+  force.set_field = function(s, h, o){
     s[h] = o
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#get-field 13
+   * @mount/drive-js/javascript/base#get-field
    */
   
-  force(function force_get_field(s, h){
+  force.get_field = function(s, h){
     return s[h]
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#remove-field 14
+   * @mount/drive-js/javascript/base#remove-field
    */
   
-  force(function force_remove_field(s, h){
+  force.remove_field = function(s, h){
     delete s[h]
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#shift-left 15
+   * @mount/drive-js/javascript/base#shift-left
    */
   
-  force(function force_shift_left(s, h){
+  force.shift_left = function(s, h){
     return s << h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#shift-right 16
+   * @mount/drive-js/javascript/base#shift-right
    */
   
-  force(function force_shift_right(s, h){
+  force.shift_right = function(s, h){
     return s >> h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#shift-right-unsigned 17
+   * @mount/drive-js/javascript/base#shift-right-unsigned
    */
   
-  force(function force_shift_right_unsigned(s, h){
+  force.shift_right_unsigned = function(s, h){
     return s >>> h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#compute-bitwise-and 18
+   * @mount/drive-js/javascript/base#compute-bitwise-and
    */
   
-  force(function force_compute_bitwise_and(s, h){
+  force.compute_bitwise_and = function(s, h){
     return s & h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-or 19
+   * @mount/drive-js/javascript/base#check-or
    */
   
-  force(function force_check_or(s, h){
+  force.check_or = function(s, h){
     return s || h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#try-catch 20
+   * @mount/drive-js/javascript/base#try-catch
    */
   
-  force(function force_try_catch(s, h){
+  force.try_catch = function(s, h){
     try {
       return s()
     } catch (e) {
       return h(e)
     }
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-if-truthy 21
+   * @mount/drive-js/javascript/base#check-if-truthy
    */
   
-  force(function force_check_if_truthy(s){
+  force.check_if_truthy = function(s){
     return !!s
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-opposite 22
+   * @mount/drive-js/javascript/base#check-opposite
    */
   
-  force(function force_check_opposite(s){
+  force.check_opposite = function(s){
     return !s
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-not-equal 23
+   * @mount/drive-js/javascript/base#check-not-equal
    */
   
-  force(function force_check_not_equal(s, h){
+  force.check_not_equal = function(s, h){
     return s !== h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#flip-block 24
+   * @mount/drive-js/javascript/base#flip-block
    */
   
-  force(function force_flip_block(s){
+  force.flip_block = function(s){
     return ~s
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-gt 25
+   * @mount/drive-js/javascript/base#check-gt
    */
   
-  force(function force_check_gt(s, h){
+  force.check_gt = function(s, h){
     return s > h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-lt 26
+   * @mount/drive-js/javascript/base#check-lt
    */
   
-  force(function force_check_lt(s, h){
+  force.check_lt = function(s, h){
     return s < h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-gte 27
+   * @mount/drive-js/javascript/base#check-gte
    */
   
-  force(function force_check_gte(s, h){
+  force.check_gte = function(s, h){
     return s >= h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-lte 28
+   * @mount/drive-js/javascript/base#check-lte
    */
   
-  force(function force_check_lte(s, h){
+  force.check_lte = function(s, h){
     return s <= h
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/base#check-and 29
+   * @mount/drive-js/javascript/base#check-and
    */
   
-  force(function force_check_and(s, h){
+  force.check_and = function(s, h){
     return s && h
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/string', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/string#replace 30
+   * @mount/drive-js/javascript/string#replace
    */
   
-  force(function force_replace(s, h, o){
+  force.replace = function(s, h, o){
     return s.replace(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#trim 31
+   * @mount/drive-js/javascript/string#trim
    */
   
-  force(function force_trim(s){
+  force.trim = function(s){
     return s.trim()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#get-char-code-at 32
+   * @mount/drive-js/javascript/string#get-char-code-at
    */
   
-  force(function force_get_char_code_at(s, h){
+  force.get_char_code_at = function(s, h){
     return s.charCodeAt(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#get-char-at 33
+   * @mount/drive-js/javascript/string#get-char-at
    */
   
-  force(function force_get_char_at(s, h){
+  force.get_char_at = function(s, h){
     return s.charAt(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#get-char-from-code 34
+   * @mount/drive-js/javascript/string#get-char-from-code
    */
   
-  force(function force_get_char_from_code(s){
+  force.get_char_from_code = function(s){
     return String.fromCharCode(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#get-char-from-code-point 35
+   * @mount/drive-js/javascript/string#get-char-from-code-point
    */
   
-  force(function force_get_char_from_code_point(s){
+  force.get_char_from_code_point = function(s){
     return String.fromCodePoint(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#convert-to-lowercase 36
+   * @mount/drive-js/javascript/string#convert-to-lowercase
    */
   
-  force(function force_convert_to_lowercase(s){
+  force.convert_to_lowercase = function(s){
     return s.toLowerCase()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#convert-to-uppercase 37
+   * @mount/drive-js/javascript/string#convert-to-uppercase
    */
   
-  force(function force_convert_to_uppercase(s){
+  force.convert_to_uppercase = function(s){
     return s.toUpperCase()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#create 38
+   * @mount/drive-js/javascript/string#create
    */
   
-  force(function force_create(){
-    return ''
-  })
+  force.create = function(){
+    return null
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#match 39
+   * @mount/drive-js/javascript/string#match
    */
   
-  force(function force_match(s, h){
+  force.match = function(s, h){
     return s.match(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#create-collator 40
+   * @mount/drive-js/javascript/string#create-collator
    */
   
-  force(function force_create_collator(){
+  force.create_collator = function(){
     return new Intl.Collator()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#get-collator-comparator 41
+   * @mount/drive-js/javascript/string#get-collator-comparator
    */
   
-  force(function force_get_collator_comparator(s){
+  force.get_collator_comparator = function(s){
     return s.compare
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#split 42
+   * @mount/drive-js/javascript/string#split
    */
   
-  force(function force_split(s, h){
+  force.split = function(s, h){
     return s.split(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#check-starts-with 43
+   * @mount/drive-js/javascript/string#check-starts-with
    */
   
-  force(function force_check_starts_with(s, h){
+  force.check_starts_with = function(s, h){
     return s.startsWith(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#check-ends-with 44
+   * @mount/drive-js/javascript/string#check-ends-with
    */
   
-  force(function force_check_ends_with(s, h){
+  force.check_ends_with = function(s, h){
     return s.endsWith(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/string#pad-start 45
+   * @mount/drive-js/javascript/string#pad-start
    */
   
-  force(function force_pad_start(s, h, o){
+  force.pad_start = function(s, h, o){
     return s.padStart(h, o)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/number', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/number#parse-decimal 46
+   * @mount/drive-js/javascript/number#parse-decimal
    */
   
-  force(function force_parse_decimal(s){
+  force.parse_decimal = function(s){
     return window.parseFloat(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#parse-int 47
+   * @mount/drive-js/javascript/number#parse-int
    */
   
-  force(function force_parse_int(s){
+  force.parse_int = function(s){
     return window.parseInt(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#parse-number 48
+   * @mount/drive-js/javascript/number#parse-number
    */
   
-  force(function force_parse_number(s){
+  force.parse_number = function(s){
     return window.Number(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-max 49
+   * @mount/drive-js/javascript/number#get-max
    */
   
-  force(function force_get_max(s, h){
+  force.get_max = function(s, h){
     return Math.max(s, h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-min 50
+   * @mount/drive-js/javascript/number#get-min
    */
   
-  force(function force_get_min(s, h){
+  force.get_min = function(s, h){
     return Math.max(s, h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#floor 51
+   * @mount/drive-js/javascript/number#floor
    */
   
-  force(function force_floor(s){
+  force.floor = function(s){
     return Math.floor(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#ceil 52
+   * @mount/drive-js/javascript/number#ceil
    */
   
-  force(function force_ceil(s){
+  force.ceil = function(s){
     return Math.ceil(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#round 53
+   * @mount/drive-js/javascript/number#round
    */
   
-  force(function force_round(s){
+  force.round = function(s){
     return Math.round(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-abs 54
+   * @mount/drive-js/javascript/number#get-abs
    */
   
-  force(function force_get_abs(s){
+  force.get_abs = function(s){
     return Math.abs(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-cos 55
+   * @mount/drive-js/javascript/number#get-cos
    */
   
-  force(function force_get_cos(s){
+  force.get_cos = function(s){
     return Math.cos(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-acos 56
+   * @mount/drive-js/javascript/number#get-acos
    */
   
-  force(function force_get_acos(s){
+  force.get_acos = function(s){
     return Math.acos(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-sin 57
+   * @mount/drive-js/javascript/number#get-sin
    */
   
-  force(function force_get_sin(s){
+  force.get_sin = function(s){
     return Math.sin(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-asin 58
+   * @mount/drive-js/javascript/number#get-asin
    */
   
-  force(function force_get_asin(s){
+  force.get_asin = function(s){
     return Math.asin(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-tan 59
+   * @mount/drive-js/javascript/number#get-tan
    */
   
-  force(function force_get_tan(s){
+  force.get_tan = function(s){
     return Math.tan(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-atan 60
+   * @mount/drive-js/javascript/number#get-atan
    */
   
-  force(function force_get_atan(s){
+  force.get_atan = function(s){
     return Math.atan(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-atan2 61
+   * @mount/drive-js/javascript/number#get-atan2
    */
   
-  force(function force_get_atan2(s){
+  force.get_atan2 = function(s){
     return Math.atan2(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-log 62
+   * @mount/drive-js/javascript/number#get-log
    */
   
-  force(function force_get_log(s){
+  force.get_log = function(s){
     return Math.log(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-sqrt 63
+   * @mount/drive-js/javascript/number#get-sqrt
    */
   
-  force(function force_get_sqrt(s){
+  force.get_sqrt = function(s){
     return Math.sqrt(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#add 64
+   * @mount/drive-js/javascript/number#add
    */
   
-  force(function force_add(s, h){
-    return s + h
-  })
+  force.add = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#subtract 65
+   * @mount/drive-js/javascript/number#subtract
    */
   
-  force(function force_subtract(s, h){
-    return s - h
-  })
+  force.subtract = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#multiply 66
+   * @mount/drive-js/javascript/number#multiply
    */
   
-  force(function force_multiply(s, h){
-    return s * h
-  })
+  force.multiply = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#divide 67
+   * @mount/drive-js/javascript/number#divide
    */
   
-  force(function force_divide(s, h){
-    return s / h
-  })
+  force.divide = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#modulus 68
+   * @mount/drive-js/javascript/number#modulus
    */
   
-  force(function force_modulus(s, h){
-    return s % h
-  })
+  force.modulus = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-exponent 69
+   * @mount/drive-js/javascript/number#get-exponent
    */
   
-  force(function force_get_exponent(s, h){
-    return s ** h
-  })
+  force.get_exponent = function(s, h){
+    return null null null
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#increment 70
+   * @mount/drive-js/javascript/number#increment
    */
   
-  force(function force_increment(s){
-    return ++s
-  })
+  force.increment = function(s){
+    return nullnull
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#decrement 71
+   * @mount/drive-js/javascript/number#decrement
    */
   
-  force(function force_decrement(s){
-    return --s
-  })
+  force.decrement = function(s){
+    return nullnull
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#check-if-not-number 72
+   * @mount/drive-js/javascript/number#check-if-not-number
    */
   
-  force(function force_check_if_not_number(s){
+  force.check_if_not_number = function(s){
     return window.isNaN(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#get-random 73
+   * @mount/drive-js/javascript/number#get-random
    */
   
-  force(function force_get_random(){
+  force.get_random = function(){
     return Math.random()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/number#loop 74
+   * @mount/drive-js/javascript/number#loop
    */
   
-  force(function force_loop(s, h, o){
+  force.loop = function(s, h, o){
     for (s; s < h; s++) {
       x[0][o](s)
     }
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/function', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/function#create 75
+   * @mount/drive-js/javascript/function#create
    */
   
-  force(function force_create(s){
+  force.create = function(s){
     return new Function(s)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/array', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/array#get-index-of 76
+   * @mount/drive-js/javascript/array#get-index-of
    */
   
-  force(function force_get_index_of(s, h){
+  force.get_index_of = function(s, h){
     return s.indexOf(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#create 77
+   * @mount/drive-js/javascript/array#create
    */
   
-  force(function force_create(){
-    return []
-  })
+  force.create = function(){
+    return null
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#create-uint8 78
+   * @mount/drive-js/javascript/array#create-uint8
    */
   
-  force(function force_create_uint8(s){
+  force.create_uint8 = function(s){
     return new Uint8Array(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#create-uint16 79
+   * @mount/drive-js/javascript/array#create-uint16
    */
   
-  force(function force_create_uint16(s){
+  force.create_uint16 = function(s){
     return new Uint16Array(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#create-uint32 80
+   * @mount/drive-js/javascript/array#create-uint32
    */
   
-  force(function force_create_uint32(s){
+  force.create_uint32 = function(s){
     return new Uint32Array(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#create-float32 81
+   * @mount/drive-js/javascript/array#create-float32
    */
   
-  force(function force_create_float32(s){
+  force.create_float32 = function(s){
     return new Float32Array(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#push 82
+   * @mount/drive-js/javascript/array#push
    */
   
-  force(function force_push(s, h){
+  force.push = function(s, h){
     s.push(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#pop 83
+   * @mount/drive-js/javascript/array#pop
    */
   
-  force(function force_pop(s){
+  force.pop = function(s){
     return s.pop()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#shift 84
+   * @mount/drive-js/javascript/array#shift
    */
   
-  force(function force_shift(s){
+  force.shift = function(s){
     return s.shift()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#unshift 85
+   * @mount/drive-js/javascript/array#unshift
    */
   
-  force(function force_unshift(s, h){
+  force.unshift = function(s, h){
     s.unshift(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#store 86
+   * @mount/drive-js/javascript/array#store
    */
   
-  force(function force_store(s, h, o){
-    s[h] = o
-  })
+  force.store = function(s, h, o){
+    s[null] = o
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#fetch 87
+   * @mount/drive-js/javascript/array#fetch
    */
   
-  force(function force_fetch(s, h){
-    return s[h]
-  })
+  force.fetch = function(s, h){
+    return s[null]
+  }
   
   /**
-   * @mount/drive/javascript/binding/array#get-length 88
+   * @mount/drive-js/javascript/array#get-length
    */
   
-  force(function force_get_length(s){
-    return s.length
-  })  
+  force.get_length = function(s){
+    return s.null
+  }
+})
+stone.mount('@mount/drive-js/javascript/dataview', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/dataview#build-data-view 89
+   * @mount/drive-js/javascript/dataview#build-data-view
    */
   
-  force(function force_build_data_view(s, h, o){
+  force.build_data_view = function(s, h, o){
     return new DataView(s, h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-int8 90
+   * @mount/drive-js/javascript/dataview#get-int8
    */
   
-  force(function force_get_int8(s, h, o){
+  force.get_int8 = function(s, h, o){
     return s.getInt8(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-uint8 91
+   * @mount/drive-js/javascript/dataview#get-uint8
    */
   
-  force(function force_get_uint8(s, h, o){
+  force.get_uint8 = function(s, h, o){
     return s.getUint8(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-int16 92
+   * @mount/drive-js/javascript/dataview#get-int16
    */
   
-  force(function force_get_int16(s, h, o){
+  force.get_int16 = function(s, h, o){
     return s.getInt16(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-uint16 93
+   * @mount/drive-js/javascript/dataview#get-uint16
    */
   
-  force(function force_get_uint16(s, h, o){
+  force.get_uint16 = function(s, h, o){
     return s.getUint16(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-int32 94
+   * @mount/drive-js/javascript/dataview#get-int32
    */
   
-  force(function force_get_int32(s, h, o){
+  force.get_int32 = function(s, h, o){
     return s.getInt32(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-uint32 95
+   * @mount/drive-js/javascript/dataview#get-uint32
    */
   
-  force(function force_get_uint32(s, h, o){
+  force.get_uint32 = function(s, h, o){
     return s.getUint32(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-float32 96
+   * @mount/drive-js/javascript/dataview#get-float32
    */
   
-  force(function force_get_float32(s, h, o){
+  force.get_float32 = function(s, h, o){
     return s.getFloat32(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-float64 97
+   * @mount/drive-js/javascript/dataview#get-float64
    */
   
-  force(function force_get_float64(s, h, o){
+  force.get_float64 = function(s, h, o){
     return s.getFloat64(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-big-int64 98
+   * @mount/drive-js/javascript/dataview#get-big-int64
    */
   
-  force(function force_get_big_int64(s, h, o){
+  force.get_big_int64 = function(s, h, o){
     return s.getBigInt64(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#get-big-uint64 99
+   * @mount/drive-js/javascript/dataview#get-big-uint64
    */
   
-  force(function force_get_big_uint64(s, h, o){
+  force.get_big_uint64 = function(s, h, o){
     return s.getBigUint64(h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-int8 100
+   * @mount/drive-js/javascript/dataview#set-int8
    */
   
-  force(function force_set_int8(s, h, o, w){
+  force.set_int8 = function(s, h, o, w){
     s.setInt8(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-uint8 101
+   * @mount/drive-js/javascript/dataview#set-uint8
    */
   
-  force(function force_set_uint8(s, h, o, w){
+  force.set_uint8 = function(s, h, o, w){
     s.setUint8(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-int16 102
+   * @mount/drive-js/javascript/dataview#set-int16
    */
   
-  force(function force_set_int16(s, h, o, w){
+  force.set_int16 = function(s, h, o, w){
     s.setInt16(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-uint16 103
+   * @mount/drive-js/javascript/dataview#set-uint16
    */
   
-  force(function force_set_uint16(s, h, o, w){
+  force.set_uint16 = function(s, h, o, w){
     s.setUint16(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-int32 104
+   * @mount/drive-js/javascript/dataview#set-int32
    */
   
-  force(function force_set_int32(s, h, o, w){
+  force.set_int32 = function(s, h, o, w){
     s.setInt32(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-uint32 105
+   * @mount/drive-js/javascript/dataview#set-uint32
    */
   
-  force(function force_set_uint32(s, h, o, w){
+  force.set_uint32 = function(s, h, o, w){
     s.setUint32(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-float32 106
+   * @mount/drive-js/javascript/dataview#set-float32
    */
   
-  force(function force_set_float32(s, h, o, w){
+  force.set_float32 = function(s, h, o, w){
     s.setFloat32(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-float64 107
+   * @mount/drive-js/javascript/dataview#set-float64
    */
   
-  force(function force_set_float64(s, h, o, w){
+  force.set_float64 = function(s, h, o, w){
     s.setFloat64(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-big-int64 108
+   * @mount/drive-js/javascript/dataview#set-big-int64
    */
   
-  force(function force_set_big_int64(s, h, o, w){
+  force.set_big_int64 = function(s, h, o, w){
     s.setBigInt64(h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/dataview#set-big-uint64 109
+   * @mount/drive-js/javascript/dataview#set-big-uint64
    */
   
-  force(function force_set_big_uint64(s, h, o, w){
+  force.set_big_uint64 = function(s, h, o, w){
     s.setBigUint64(h, o, w)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/console', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/console#assert 110
+   * @mount/drive-js/javascript/console#assert
    */
   
-  force(function force_assert(s, h, o, w){
+  force.assert = function(s, h, o, w){
     console.assert(s, h, o, w)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#clear 111
+   * @mount/drive-js/javascript/console#clear
    */
   
-  force(function force_clear(){
+  force.clear = function(){
     console.clear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#count 112
+   * @mount/drive-js/javascript/console#count
    */
   
-  force(function force_count(s){
+  force.count = function(s){
     console.count(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#count-reset 113
+   * @mount/drive-js/javascript/console#count-reset
    */
   
-  force(function force_count_reset(s){
+  force.count_reset = function(s){
     console.countReset(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#debug 114
+   * @mount/drive-js/javascript/console#debug
    */
   
-  force(function force_debug(s, h, o){
+  force.debug = function(s, h, o){
     console.debug(s, h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#dir 115
+   * @mount/drive-js/javascript/console#dir
    */
   
-  force(function force_dir(s){
+  force.dir = function(s){
     console.dir(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#dirxml 116
+   * @mount/drive-js/javascript/console#dirxml
    */
   
-  force(function force_dirxml(s){
+  force.dirxml = function(s){
     console.dirxml(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#error 117
+   * @mount/drive-js/javascript/console#error
    */
   
-  force(function force_error(s, h, o){
+  force.error = function(s, h, o){
     console.error(s, h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#group 118
+   * @mount/drive-js/javascript/console#group
    */
   
-  force(function force_group(s){
+  force.group = function(s){
     console.group(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#group-collapsed 119
+   * @mount/drive-js/javascript/console#group-collapsed
    */
   
-  force(function force_group_collapsed(s){
+  force.group_collapsed = function(s){
     console.groupCollapsed(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#group-end 120
+   * @mount/drive-js/javascript/console#group-end
    */
   
-  force(function force_group_end(){
+  force.group_end = function(){
     console.groupEnd()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#info 121
+   * @mount/drive-js/javascript/console#info
    */
   
-  force(function force_info(s, h, o){
+  force.info = function(s, h, o){
     console.info(s, h, o)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#log 122
+   * @mount/drive-js/javascript/console#log
    */
   
-  force(function force_log(s){
+  force.log = function(s){
     console.log(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#table 123
+   * @mount/drive-js/javascript/console#table
    */
   
-  force(function force_table(s, h){
+  force.table = function(s, h){
     console.table(s, h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#time 124
+   * @mount/drive-js/javascript/console#time
    */
   
-  force(function force_time(s){
+  force.time = function(s){
     console.time(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#time-end 125
+   * @mount/drive-js/javascript/console#time-end
    */
   
-  force(function force_time_end(s){
+  force.time_end = function(s){
     console.timeEnd(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#time-log 126
+   * @mount/drive-js/javascript/console#time-log
    */
   
-  force(function force_time_log(s){
+  force.time_log = function(s){
     console.timeLog(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#trace 127
+   * @mount/drive-js/javascript/console#trace
    */
   
-  force(function force_trace(s){
+  force.trace = function(s){
     console.trace(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/console#warn 128
+   * @mount/drive-js/javascript/console#warn
    */
   
-  force(function force_warn(s, h, o){
+  force.warn = function(s, h, o){
     console.warn(s, h, o)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/datetime', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/datetime#create 129
+   * @mount/drive-js/javascript/datetime#create
    */
   
-  force(function force_create(s){
+  force.create = function(s){
     return new Date(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#parse 130
+   * @mount/drive-js/javascript/datetime#parse
    */
   
-  force(function force_parse(s){
+  force.parse = function(s){
     return Date.parse(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-millisecond-timestamp 131
+   * @mount/drive-js/javascript/datetime#get-millisecond-timestamp
    */
   
-  force(function force_get_millisecond_timestamp(){
+  force.get_millisecond_timestamp = function(){
     return Date.now()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-microsecond-timestamp 132
+   * @mount/drive-js/javascript/datetime#get-microsecond-timestamp
    */
   
-  force(function force_get_microsecond_timestamp(){
+  force.get_microsecond_timestamp = function(){
     return performance.now()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-date 133
+   * @mount/drive-js/javascript/datetime#get-date
    */
   
-  force(function force_get_date(s){
+  force.get_date = function(s){
     return s.getDate()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-day 134
+   * @mount/drive-js/javascript/datetime#get-day
    */
   
-  force(function force_get_day(s){
+  force.get_day = function(s){
     return s.getDay()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-full-year 135
+   * @mount/drive-js/javascript/datetime#get-full-year
    */
   
-  force(function force_get_full_year(s){
+  force.get_full_year = function(s){
     return s.getFullYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-hours 136
+   * @mount/drive-js/javascript/datetime#get-hours
    */
   
-  force(function force_get_hours(s){
+  force.get_hours = function(s){
     return s.getHours()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-milliseconds 137
+   * @mount/drive-js/javascript/datetime#get-milliseconds
    */
   
-  force(function force_get_milliseconds(s){
+  force.get_milliseconds = function(s){
     return s.getMilliseconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-minutes 138
+   * @mount/drive-js/javascript/datetime#get-minutes
    */
   
-  force(function force_get_minutes(s){
+  force.get_minutes = function(s){
     return s.getMinutes()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-month 139
+   * @mount/drive-js/javascript/datetime#get-month
    */
   
-  force(function force_get_month(s){
+  force.get_month = function(s){
     return s.getMonth()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-seconds 140
+   * @mount/drive-js/javascript/datetime#get-seconds
    */
   
-  force(function force_get_seconds(s){
+  force.get_seconds = function(s){
     return s.getSeconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-time 141
+   * @mount/drive-js/javascript/datetime#get-time
    */
   
-  force(function force_get_time(s){
+  force.get_time = function(s){
     return s.getTime()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-timezone-offset 142
+   * @mount/drive-js/javascript/datetime#get-timezone-offset
    */
   
-  force(function force_get_timezone_offset(s){
+  force.get_timezone_offset = function(s){
     return s.getTimezoneOffset()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-date 143
+   * @mount/drive-js/javascript/datetime#get-utc-date
    */
   
-  force(function force_get_utc_date(s){
+  force.get_utc_date = function(s){
     return s.getUTCDate()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-day 144
+   * @mount/drive-js/javascript/datetime#get-utc-day
    */
   
-  force(function force_get_utc_day(s){
+  force.get_utc_day = function(s){
     return s.getUTCDay()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-full-year 145
+   * @mount/drive-js/javascript/datetime#get-utc-full-year
    */
   
-  force(function force_get_utc_full_year(s){
+  force.get_utc_full_year = function(s){
     return s.getUTCFullYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-hours 146
+   * @mount/drive-js/javascript/datetime#get-utc-hours
    */
   
-  force(function force_get_utc_hours(s){
+  force.get_utc_hours = function(s){
     return s.getUTCHours()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-milliseconds 147
+   * @mount/drive-js/javascript/datetime#get-utc-milliseconds
    */
   
-  force(function force_get_utc_milliseconds(s){
+  force.get_utc_milliseconds = function(s){
     return s.getUTCMilliseconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-minutes 148
+   * @mount/drive-js/javascript/datetime#get-utc-minutes
    */
   
-  force(function force_get_utc_minutes(s){
+  force.get_utc_minutes = function(s){
     return s.getUTCMinutes()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-month 149
+   * @mount/drive-js/javascript/datetime#get-utc-month
    */
   
-  force(function force_get_utc_month(s){
+  force.get_utc_month = function(s){
     return s.getUTCMonth()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-seconds 150
+   * @mount/drive-js/javascript/datetime#get-utc-seconds
    */
   
-  force(function force_get_utc_seconds(s){
+  force.get_utc_seconds = function(s){
     return s.getUTCSeconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-year 151
+   * @mount/drive-js/javascript/datetime#get-year
    */
   
-  force(function force_get_year(s){
+  force.get_year = function(s){
     return s.getYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-date 152
+   * @mount/drive-js/javascript/datetime#set-date
    */
   
-  force(function force_set_date(s, h){
+  force.set_date = function(s, h){
     s.setDate(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-full-year 153
+   * @mount/drive-js/javascript/datetime#set-full-year
    */
   
-  force(function force_set_full_year(s, h){
+  force.set_full_year = function(s, h){
     s.setFullYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-hours 154
+   * @mount/drive-js/javascript/datetime#set-hours
    */
   
-  force(function force_set_hours(s, h){
+  force.set_hours = function(s, h){
     s.setHours(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-milliseconds 155
+   * @mount/drive-js/javascript/datetime#set-milliseconds
    */
   
-  force(function force_set_milliseconds(s, h){
+  force.set_milliseconds = function(s, h){
     s.setMilliseconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-minutes 156
+   * @mount/drive-js/javascript/datetime#set-minutes
    */
   
-  force(function force_set_minutes(s, h){
+  force.set_minutes = function(s, h){
     s.setMinutes(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-month 157
+   * @mount/drive-js/javascript/datetime#set-month
    */
   
-  force(function force_set_month(s, h){
+  force.set_month = function(s, h){
     s.setMonth(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-seconds 158
+   * @mount/drive-js/javascript/datetime#set-seconds
    */
   
-  force(function force_set_seconds(s, h){
+  force.set_seconds = function(s, h){
     s.setSeconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-time 159
+   * @mount/drive-js/javascript/datetime#set-time
    */
   
-  force(function force_set_time(s, h){
+  force.set_time = function(s, h){
     s.setTime(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-date 160
+   * @mount/drive-js/javascript/datetime#set-utc-date
    */
   
-  force(function force_set_utc_date(s, h){
+  force.set_utc_date = function(s, h){
     s.setUTCDate(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-full-year 161
+   * @mount/drive-js/javascript/datetime#set-utc-full-year
    */
   
-  force(function force_set_utc_full_year(s, h){
+  force.set_utc_full_year = function(s, h){
     s.setUTCFullYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-hours 162
+   * @mount/drive-js/javascript/datetime#set-utc-hours
    */
   
-  force(function force_set_utc_hours(s, h){
+  force.set_utc_hours = function(s, h){
     s.setUTCHours(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-milliseconds 163
+   * @mount/drive-js/javascript/datetime#set-utc-milliseconds
    */
   
-  force(function force_set_utc_milliseconds(s, h){
+  force.set_utc_milliseconds = function(s, h){
     s.setUTCMilliseconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-minutes 164
+   * @mount/drive-js/javascript/datetime#set-utc-minutes
    */
   
-  force(function force_set_utc_minutes(s, h){
+  force.set_utc_minutes = function(s, h){
     s.setUTCMinutes(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-month 165
+   * @mount/drive-js/javascript/datetime#set-utc-month
    */
   
-  force(function force_set_utc_month(s, h){
+  force.set_utc_month = function(s, h){
     s.setUTCMonth(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-seconds 166
+   * @mount/drive-js/javascript/datetime#set-utc-seconds
    */
   
-  force(function force_set_utc_seconds(s, h){
+  force.set_utc_seconds = function(s, h){
     s.setUTCSeconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-year 167
+   * @mount/drive-js/javascript/datetime#set-year
    */
   
-  force(function force_set_year(s, h){
+  force.set_year = function(s, h){
     s.setYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-date-string 168
+   * @mount/drive-js/javascript/datetime#convert-to-date-string
    */
   
-  force(function force_convert_to_date_string(s){
+  force.convert_to_date_string = function(s){
     return s.toDateString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-iso-string 169
+   * @mount/drive-js/javascript/datetime#convert-to-iso-string
    */
   
-  force(function force_convert_to_iso_string(s){
+  force.convert_to_iso_string = function(s){
     return s.toISOString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-json 170
+   * @mount/drive-js/javascript/datetime#convert-to-json
    */
   
-  force(function force_convert_to_json(s){
+  force.convert_to_json = function(s){
     return s.toJSON()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-gmt-string 171
+   * @mount/drive-js/javascript/datetime#convert-to-gmt-string
    */
   
-  force(function force_convert_to_gmt_string(s){
+  force.convert_to_gmt_string = function(s){
     return s.toGMTString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-date-string 172
+   * @mount/drive-js/javascript/datetime#convert-to-locale-date-string
    */
   
-  force(function force_convert_to_locale_date_string(s){
+  force.convert_to_locale_date_string = function(s){
     return s.toLocaleDateString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-format 173
+   * @mount/drive-js/javascript/datetime#convert-to-locale-format
    */
   
-  force(function force_convert_to_locale_format(s){
+  force.convert_to_locale_format = function(s){
     return s.toLocaleFormat()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-string 174
+   * @mount/drive-js/javascript/datetime#convert-to-locale-string
    */
   
-  force(function force_convert_to_locale_string(s){
+  force.convert_to_locale_string = function(s){
     return s.toLocaleString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-time-string 175
+   * @mount/drive-js/javascript/datetime#convert-to-locale-time-string
    */
   
-  force(function force_convert_to_locale_time_string(s){
+  force.convert_to_locale_time_string = function(s){
     return s.toLocaleTimeString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-string 176
+   * @mount/drive-js/javascript/datetime#convert-to-string
    */
   
-  force(function force_convert_to_string(s){
+  force.convert_to_string = function(s){
     return s.toString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-time-string 177
+   * @mount/drive-js/javascript/datetime#convert-to-time-string
    */
   
-  force(function force_convert_to_time_string(s){
+  force.convert_to_time_string = function(s){
     return s.toTimeString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-utc-string 178
+   * @mount/drive-js/javascript/datetime#convert-to-utc-string
    */
   
-  force(function force_convert_to_utc_string(s){
+  force.convert_to_utc_string = function(s){
     return s.toUTCString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-value-of 179
+   * @mount/drive-js/javascript/datetime#get-value-of
    */
   
-  force(function force_get_value_of(s){
+  force.get_value_of = function(s){
     return s.valueOf()
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/error', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/error#get-stack 180
+   * @mount/drive-js/javascript/error#get-stack
    */
   
-  force(function force_get_stack(s){
+  force.get_stack = function(s){
     return s.stack
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/error#throw 181
+   * @mount/drive-js/javascript/error#throw
    */
   
-  force(function force_throw(s){
-    throw s
-  })  
+  force.throw = function(s){
+    throw 
+  }
+})
+stone.mount('@mount/drive-js/javascript/interval', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/interval#create 182
+   * @mount/drive-js/javascript/interval#create
    */
   
-  force(function force_create(s, h){
+  force.create = function(s, h){
     return window.setInterval(h, s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/interval#remove 183
+   * @mount/drive-js/javascript/interval#remove
    */
   
-  force(function force_remove(s){
+  force.remove = function(s){
     window.clearInterval(s)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/object', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/object#create 184
+   * @mount/drive-js/javascript/object#create
    */
   
-  force(function force_create(){
+  force.create = function(){
     return {}
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/object#check-if-has-property 185
+   * @mount/drive-js/javascript/object#check-if-has-property
    */
   
-  force(function force_check_if_has_property(s, h){
+  force.check_if_has_property = function(s, h){
     return s.hasOwnProperty(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/object#stringify-json 186
+   * @mount/drive-js/javascript/object#stringify-json
    */
   
-  force(function force_stringify_json(s){
+  force.stringify_json = function(s){
     return JSON.stringify(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/object#parse-json 187
+   * @mount/drive-js/javascript/object#parse-json
    */
   
-  force(function force_parse_json(s){
+  force.parse_json = function(s){
     return JSON.parse(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/object#get-keys 188
+   * @mount/drive-js/javascript/object#get-keys
    */
   
-  force(function force_get_keys(s){
+  force.get_keys = function(s){
     Object.keys(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/object#get-values 189
+   * @mount/drive-js/javascript/object#get-values
    */
   
-  force(function force_get_values(s){
+  force.get_values = function(s){
     Object.values(s)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/regex', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/regex#create 190
+   * @mount/drive-js/javascript/regex#create
    */
   
-  force(function force_create(s, h){
+  force.create = function(s, h){
     return new RegExp(s, h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/regex#test 191
+   * @mount/drive-js/javascript/regex#test
    */
   
-  force(function force_test(s, h){
+  force.test = function(s, h){
     return s.test(h)
-  })  
+  }
+})
+stone.mount('@mount/drive-js/javascript/timeout', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/timeout#create 192
+   * @mount/drive-js/javascript/timeout#create
    */
   
-  force(function force_create(s, h){
+  force.create = function(s, h){
     return window.setTimeout(h, s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/timeout#remove 193
+   * @mount/drive-js/javascript/timeout#remove
    */
   
-  force(function force_remove(s){
+  force.remove = function(s){
     window.clearTimeout(s)
-  })  
-  /**
-   * @mount/drive/node/binding/fs#write-file 194
-   */
-  
-  force(function force_write_file(s, h, o, w, l){
-    s.writeFile(h, o, w, l)
-  })
-  
-  /**
-   * @mount/drive/node/binding/fs#read-file 195
-   */
-  
-  force(function force_read_file(s, h, o, w){
-    s.readFile(h, o, w)
-  })
+  }
+})
+stone.mount('@mount/drive-node', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/fs', function(build){
+  const force = build.force
   
   /**
-   * @mount/drive/node/binding/fs#append-file 196
+   * @mount/drive-node/fs#write-file
    */
   
-  force(function force_append_file(s, h, o, w){
-    s.appendFile(h, o, w)
-  })
+  force.write_file = function(s, h, o, w, l){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#change-mode 197
+   * @mount/drive-node/fs#read-file
    */
   
-  force(function force_change_mode(s, h, o, w){
-    s.chmod(h, o, w)
-  })
+  force.read_file = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#change-owner 198
+   * @mount/drive-node/fs#append-file
    */
   
-  force(function force_change_owner(s, h, o, w, l){
-    s.chown(h, o, w, l)
-  })
+  force.append_file = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#copy-file 199
+   * @mount/drive-node/fs#change-mode
    */
   
-  force(function force_copy_file(s, h, o, w, l){
-    s.copyFile(h, o, w, l)
-  })
+  force.change_mode = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#create-read-stream 200
+   * @mount/drive-node/fs#change-owner
    */
   
-  force(function force_create_read_stream(s, h, o){
-    return s.createReadStream(h, o)
-  })
+  force.change_owner = function(s, h, o, w, l){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#create-write-stream 201
+   * @mount/drive-node/fs#copy-file
    */
   
-  force(function force_create_write_stream(s, h, o){
-    return s.createWriteStream(h, o)
-  })
+  force.copy_file = function(s, h, o, w, l){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#build-directory 202
+   * @mount/drive-node/fs#create-read-stream
    */
   
-  force(function force_build_directory(s, h, o, w){
-    s.mkdir(h, o, w)
-  })
+  force.create_read_stream = function(s, h, o){
+    return null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#read-directory 203
+   * @mount/drive-node/fs#create-write-stream
    */
   
-  force(function force_read_directory(s, h, o, w){
-    s.readdir(h, o, w)
-  })
+  force.create_write_stream = function(s, h, o){
+    return null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#rename 204
+   * @mount/drive-node/fs#build-directory
    */
   
-  force(function force_rename(s, h, o, w){
-    s.rename(h, o, w)
-  })
+  force.build_directory = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#clear-directory 205
+   * @mount/drive-node/fs#read-directory
    */
   
-  force(function force_clear_directory(s, h, o, w){
-    s.rmdir(h, o, w)
-  })
+  force.read_directory = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#stat 206
+   * @mount/drive-node/fs#rename
    */
   
-  force(function force_stat(s, h, o, w){
-    s.stat(h, o, w)
-  })
+  force.rename = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#truncate 207
+   * @mount/drive-node/fs#clear-directory
    */
   
-  force(function force_truncate(s, h, o, w){
-    s.truncate(h, o, w)
-  })
+  force.clear_directory = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/fs#unlink 208
+   * @mount/drive-node/fs#stat
    */
   
-  force(function force_unlink(s, h, o){
-    s.unlink(h, o)
-  })  
-  /**
-   * @mount/drive/node/binding/assert#assert-equal 209
-   */
-  
-  force(function force_assert_equal(s, h, o){
-    s.equal(h, o)
-  })  
-  /**
-   * @mount/drive/node/binding/child-process#spawn 210
-   */
-  
-  force(function force_spawn(s, h, o){
-    return s.spawn(h, o)
-  })  
-  /**
-   * @mount/drive/node/binding/event#add-event-listener 211
-   */
-  
-  force(function force_add_event_listener(s, h, o){
-    s.on(h, o)
-  })
+  force.stat = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/event#remove-event-listener 212
+   * @mount/drive-node/fs#truncate
    */
   
-  force(function force_remove_event_listener(s, h, o){
-    s.off(h, o)
-  })  
-  /**
-   * @mount/drive/node/binding/http2#create-secure-server 213
-   */
-  
-  force(function force_create_secure_server(s, h, o){
-    s.createSecureServer(h, o)
-  })  
-  /**
-   * @mount/drive/node/binding/module#require 214
-   */
-  
-  force(function force_require(s){
-    return require(s)
-  })
+  force.truncate = function(s, h, o, w){
+    null.null()
+  }
   
   /**
-   * @mount/drive/node/binding/module#get-current-directory-path 215
+   * @mount/drive-node/fs#unlink
    */
   
-  force(function force_get_current_directory_path(){
-    return __dirname
-  })
+  force.unlink = function(s, h, o){
+    null.null()
+  }
+})
+stone.mount('@mount/drive-node/assert', function(build){
+  const force = build.force
   
   /**
-   * @mount/drive/node/binding/module#get-current-file-path 216
+   * @mount/drive-node/assert#assert-equal
    */
   
-  force(function force_get_current_file_path(){
-    return __filename
-  })  
+  force.assert_equal = function(s, h, o){
+    null.null()
+  }
+})
+stone.mount('@mount/drive-node/buffer', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/child-process', function(build){
+  const force = build.force
+  
   /**
-   * @mount/drive/javascript/binding/datetime#create 217
+   * @mount/drive-node/child-process#spawn
    */
   
-  force(function force_create(s){
+  force.spawn = function(s, h, o){
+    return null.null()
+  }
+})
+stone.mount('@mount/drive-node/event', function(build){
+  const force = build.force
+  
+  /**
+   * @mount/drive-node/event#add-event-listener
+   */
+  
+  force.add_event_listener = function(s, h, o){
+    null.null()
+  }
+  
+  /**
+   * @mount/drive-node/event#remove-event-listener
+   */
+  
+  force.remove_event_listener = function(s, h, o){
+    null.null()
+  }
+})
+stone.mount('@mount/drive-node/http', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/http2', function(build){
+  const force = build.force
+  
+  /**
+   * @mount/drive-node/http2#create-secure-server
+   */
+  
+  force.create_secure_server = function(s, h, o){
+    null.null()
+  }
+})
+stone.mount('@mount/drive-node/module', function(build){
+  const force = build.force
+  
+  /**
+   * @mount/drive-node/module#require
+   */
+  
+  force.require = function(s){
+    return require()
+  }
+  
+  /**
+   * @mount/drive-node/module#get-current-directory-path
+   */
+  
+  force.get_current_directory_path = function(){
+    return null
+  }
+  
+  /**
+   * @mount/drive-node/module#get-current-file-path
+   */
+  
+  force.get_current_file_path = function(){
+    return null
+  }
+})
+stone.mount('@mount/drive-node/net', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/os', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/path', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/zlib', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-node/process', function(build){
+  const force = build.force
+})
+stone.mount('@mount/drive-js/datetime', function(build){
+  const force = build.force
+  
+  /**
+   * @mount/drive-js/datetime#create
+   */
+  
+  force.create = function(s){
     return new Date(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#parse 218
+   * @mount/drive-js/datetime#parse
    */
   
-  force(function force_parse(s){
+  force.parse = function(s){
     return Date.parse(s)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-millisecond-timestamp 219
+   * @mount/drive-js/datetime#get-millisecond-timestamp
    */
   
-  force(function force_get_millisecond_timestamp(){
+  force.get_millisecond_timestamp = function(){
     return Date.now()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-microsecond-timestamp 220
+   * @mount/drive-js/datetime#get-microsecond-timestamp
    */
   
-  force(function force_get_microsecond_timestamp(){
+  force.get_microsecond_timestamp = function(){
     return performance.now()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-date 221
+   * @mount/drive-js/datetime#get-date
    */
   
-  force(function force_get_date(s){
+  force.get_date = function(s){
     return s.getDate()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-day 222
+   * @mount/drive-js/datetime#get-day
    */
   
-  force(function force_get_day(s){
+  force.get_day = function(s){
     return s.getDay()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-full-year 223
+   * @mount/drive-js/datetime#get-full-year
    */
   
-  force(function force_get_full_year(s){
+  force.get_full_year = function(s){
     return s.getFullYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-hours 224
+   * @mount/drive-js/datetime#get-hours
    */
   
-  force(function force_get_hours(s){
+  force.get_hours = function(s){
     return s.getHours()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-milliseconds 225
+   * @mount/drive-js/datetime#get-milliseconds
    */
   
-  force(function force_get_milliseconds(s){
+  force.get_milliseconds = function(s){
     return s.getMilliseconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-minutes 226
+   * @mount/drive-js/datetime#get-minutes
    */
   
-  force(function force_get_minutes(s){
+  force.get_minutes = function(s){
     return s.getMinutes()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-month 227
+   * @mount/drive-js/datetime#get-month
    */
   
-  force(function force_get_month(s){
+  force.get_month = function(s){
     return s.getMonth()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-seconds 228
+   * @mount/drive-js/datetime#get-seconds
    */
   
-  force(function force_get_seconds(s){
+  force.get_seconds = function(s){
     return s.getSeconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-time 229
+   * @mount/drive-js/datetime#get-time
    */
   
-  force(function force_get_time(s){
+  force.get_time = function(s){
     return s.getTime()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-timezone-offset 230
+   * @mount/drive-js/datetime#get-timezone-offset
    */
   
-  force(function force_get_timezone_offset(s){
+  force.get_timezone_offset = function(s){
     return s.getTimezoneOffset()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-date 231
+   * @mount/drive-js/datetime#get-utc-date
    */
   
-  force(function force_get_utc_date(s){
+  force.get_utc_date = function(s){
     return s.getUTCDate()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-day 232
+   * @mount/drive-js/datetime#get-utc-day
    */
   
-  force(function force_get_utc_day(s){
+  force.get_utc_day = function(s){
     return s.getUTCDay()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-full-year 233
+   * @mount/drive-js/datetime#get-utc-full-year
    */
   
-  force(function force_get_utc_full_year(s){
+  force.get_utc_full_year = function(s){
     return s.getUTCFullYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-hours 234
+   * @mount/drive-js/datetime#get-utc-hours
    */
   
-  force(function force_get_utc_hours(s){
+  force.get_utc_hours = function(s){
     return s.getUTCHours()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-milliseconds 235
+   * @mount/drive-js/datetime#get-utc-milliseconds
    */
   
-  force(function force_get_utc_milliseconds(s){
+  force.get_utc_milliseconds = function(s){
     return s.getUTCMilliseconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-minutes 236
+   * @mount/drive-js/datetime#get-utc-minutes
    */
   
-  force(function force_get_utc_minutes(s){
+  force.get_utc_minutes = function(s){
     return s.getUTCMinutes()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-month 237
+   * @mount/drive-js/datetime#get-utc-month
    */
   
-  force(function force_get_utc_month(s){
+  force.get_utc_month = function(s){
     return s.getUTCMonth()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-utc-seconds 238
+   * @mount/drive-js/datetime#get-utc-seconds
    */
   
-  force(function force_get_utc_seconds(s){
+  force.get_utc_seconds = function(s){
     return s.getUTCSeconds()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-year 239
+   * @mount/drive-js/datetime#get-year
    */
   
-  force(function force_get_year(s){
+  force.get_year = function(s){
     return s.getYear()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-date 240
+   * @mount/drive-js/datetime#set-date
    */
   
-  force(function force_set_date(s, h){
+  force.set_date = function(s, h){
     s.setDate(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-full-year 241
+   * @mount/drive-js/datetime#set-full-year
    */
   
-  force(function force_set_full_year(s, h){
+  force.set_full_year = function(s, h){
     s.setFullYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-hours 242
+   * @mount/drive-js/datetime#set-hours
    */
   
-  force(function force_set_hours(s, h){
+  force.set_hours = function(s, h){
     s.setHours(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-milliseconds 243
+   * @mount/drive-js/datetime#set-milliseconds
    */
   
-  force(function force_set_milliseconds(s, h){
+  force.set_milliseconds = function(s, h){
     s.setMilliseconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-minutes 244
+   * @mount/drive-js/datetime#set-minutes
    */
   
-  force(function force_set_minutes(s, h){
+  force.set_minutes = function(s, h){
     s.setMinutes(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-month 245
+   * @mount/drive-js/datetime#set-month
    */
   
-  force(function force_set_month(s, h){
+  force.set_month = function(s, h){
     s.setMonth(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-seconds 246
+   * @mount/drive-js/datetime#set-seconds
    */
   
-  force(function force_set_seconds(s, h){
+  force.set_seconds = function(s, h){
     s.setSeconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-time 247
+   * @mount/drive-js/datetime#set-time
    */
   
-  force(function force_set_time(s, h){
+  force.set_time = function(s, h){
     s.setTime(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-date 248
+   * @mount/drive-js/datetime#set-utc-date
    */
   
-  force(function force_set_utc_date(s, h){
+  force.set_utc_date = function(s, h){
     s.setUTCDate(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-full-year 249
+   * @mount/drive-js/datetime#set-utc-full-year
    */
   
-  force(function force_set_utc_full_year(s, h){
+  force.set_utc_full_year = function(s, h){
     s.setUTCFullYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-hours 250
+   * @mount/drive-js/datetime#set-utc-hours
    */
   
-  force(function force_set_utc_hours(s, h){
+  force.set_utc_hours = function(s, h){
     s.setUTCHours(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-milliseconds 251
+   * @mount/drive-js/datetime#set-utc-milliseconds
    */
   
-  force(function force_set_utc_milliseconds(s, h){
+  force.set_utc_milliseconds = function(s, h){
     s.setUTCMilliseconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-minutes 252
+   * @mount/drive-js/datetime#set-utc-minutes
    */
   
-  force(function force_set_utc_minutes(s, h){
+  force.set_utc_minutes = function(s, h){
     s.setUTCMinutes(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-month 253
+   * @mount/drive-js/datetime#set-utc-month
    */
   
-  force(function force_set_utc_month(s, h){
+  force.set_utc_month = function(s, h){
     s.setUTCMonth(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-utc-seconds 254
+   * @mount/drive-js/datetime#set-utc-seconds
    */
   
-  force(function force_set_utc_seconds(s, h){
+  force.set_utc_seconds = function(s, h){
     s.setUTCSeconds(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#set-year 255
+   * @mount/drive-js/datetime#set-year
    */
   
-  force(function force_set_year(s, h){
+  force.set_year = function(s, h){
     s.setYear(h)
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-date-string 256
+   * @mount/drive-js/datetime#convert-to-date-string
    */
   
-  force(function force_convert_to_date_string(s){
+  force.convert_to_date_string = function(s){
     return s.toDateString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-iso-string 257
+   * @mount/drive-js/datetime#convert-to-iso-string
    */
   
-  force(function force_convert_to_iso_string(s){
+  force.convert_to_iso_string = function(s){
     return s.toISOString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-json 258
+   * @mount/drive-js/datetime#convert-to-json
    */
   
-  force(function force_convert_to_json(s){
+  force.convert_to_json = function(s){
     return s.toJSON()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-gmt-string 259
+   * @mount/drive-js/datetime#convert-to-gmt-string
    */
   
-  force(function force_convert_to_gmt_string(s){
+  force.convert_to_gmt_string = function(s){
     return s.toGMTString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-date-string 260
+   * @mount/drive-js/datetime#convert-to-locale-date-string
    */
   
-  force(function force_convert_to_locale_date_string(s){
+  force.convert_to_locale_date_string = function(s){
     return s.toLocaleDateString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-format 261
+   * @mount/drive-js/datetime#convert-to-locale-format
    */
   
-  force(function force_convert_to_locale_format(s){
+  force.convert_to_locale_format = function(s){
     return s.toLocaleFormat()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-string 262
+   * @mount/drive-js/datetime#convert-to-locale-string
    */
   
-  force(function force_convert_to_locale_string(s){
+  force.convert_to_locale_string = function(s){
     return s.toLocaleString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-locale-time-string 263
+   * @mount/drive-js/datetime#convert-to-locale-time-string
    */
   
-  force(function force_convert_to_locale_time_string(s){
+  force.convert_to_locale_time_string = function(s){
     return s.toLocaleTimeString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-string 264
+   * @mount/drive-js/datetime#convert-to-string
    */
   
-  force(function force_convert_to_string(s){
+  force.convert_to_string = function(s){
     return s.toString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-time-string 265
+   * @mount/drive-js/datetime#convert-to-time-string
    */
   
-  force(function force_convert_to_time_string(s){
+  force.convert_to_time_string = function(s){
     return s.toTimeString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#convert-to-utc-string 266
+   * @mount/drive-js/datetime#convert-to-utc-string
    */
   
-  force(function force_convert_to_utc_string(s){
+  force.convert_to_utc_string = function(s){
     return s.toUTCString()
-  })
+  }
   
   /**
-   * @mount/drive/javascript/binding/datetime#get-value-of 267
+   * @mount/drive-js/datetime#get-value-of
    */
   
-  force(function force_get_value_of(s){
+  force.get_value_of = function(s){
     return s.valueOf()
-  })
-
-  function force(w) {
-    FORCE.push(w)
   }
+})
 
-  const build = {
-    store: STORE,
-    mount: () => FORCE[BUILD_MOUNT](),
-    drive: () => FORCE[0](),
-    cause: (i, ...args) => FORCE[i](...args)
-  }
-
-  return build
-
-  function CAUSE() {
-    let args = Array.prototype.slice.call(arguments)
-    let cause = args.shift()
-    let newArgs = []
-    let callArgs = []
-    for (let i = 0, n = args.length; i < n; i += 2) {
-      let a = args[i]
-      let b = args[i + 1]
-      let c = a(b)
-      newArgs.push(c)
-      callArgs.push(`${a.name}(${b}) => ${c}`)
-    }
-    const shift = (new Array(SLICE)).join('  ')
-    const pad = String(MOUNT[SHIFT_COUNT]).padStart(5, ' ')
-    console.log(`${shift}${pad}. ${cause.name}(${callArgs.join(', ')})`)
-    SLICE++
-    let build = cause.apply(null, newArgs)
-    SLICE--
-    return build
-  }
-
-  function WRITE(s, h, o) {
-    const shift = (new Array(SLICE)).join('  ')
-    const pad = String(MOUNT[SHIFT_COUNT]).padStart(5, ' ')
-    console.log(`${shift}${pad}. ${s.name}(${h}, ${o})`)
-    s(h, o)
-  }
-}
-
-if (typeof module !== 'undefined') {
-  module.exports = stone
-}
