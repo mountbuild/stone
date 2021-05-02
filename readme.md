@@ -20,6 +20,7 @@
   <a href='#welcome'>Welcome</a> •
   <a href='#summary'>Summary</a> •
   <a href='#history'>History</a> •
+  <a href='#contributing'>Contributing</a> •
   <a href='#license'>License</a>
 </p>
 
@@ -33,7 +34,7 @@ Welcome to the `stone` compiler. You are in the right place. Here you will find 
 
 ### Summary
 
-Stone is a compiler for the XO programming language. Currently it compiles to JSON, which you can then transform and do as you wish. In the future we plan on adding support for "packages" ("stacks") and for making [runtimes](https://github.com/mountbuild/drive) for the browser in JavaScript, MacOS/iOS in Swift, Linux in Assembly, Windows in JavaScript, and Android in Kotlin.
+Stone is a compiler for the XO modelling language. Currently it compiles to JSON, which you can then transform and do as you wish. In the future we plan on adding support for "packages" ("stacks") and for making [runtimes](https://github.com/mountbuild/drive) for the browser in JavaScript, MacOS/iOS in Swift, Linux in Assembly, Windows in JavaScript, and Android in Kotlin.
 
 ```bash
 npm install @mountbuild/stone
