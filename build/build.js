@@ -1,6 +1,54 @@
 
 const global = typeof window == 'undefined' ? global : window
 
+
+
+function Stone() {
+  this.store = {}
+}
+
+Stone.prototype.sheet = function(trace){
+  const stack = trace.split('/')
+  let count = 0
+  let store = this.store
+  let sheet
+  while (count < stack.length) {
+    const block = stack[count]
+    sheet = store[block] = store[block] || new Store(block)
+    store = sheet.store
+    count++
+  }
+  return sheet
+}
+
+Stone.prototype.mount = function(trace, mount){
+  this.sheet(trace).mount(mount)
+  return this
+}
+
+Stone.prototype.fetch = function(trace){
+  return this.sheet(trace)
+}
+
+Stone.prototype.clear = function(trace){
+
+}
+
+function Store(trace) {
+  this.trace = trace
+  this.store = {}
+  this.force = {}
+  this.field = {}
+  this.state = {}
+}
+
+Store.prototype.mount = function(force){
+  force(this)
+  return this
+}
+
+const stone = new Stone
+
 class KeyValue {
   constructor(key, value) {
       this.key = key;
@@ -260,13 +308,13 @@ class KeyValueTree {
 global.stone = stone
 
 stone.mount('@mount/drive-node/fs', ({ state }) => {
-  state.fs = require('fs')
+  // state.fs = require('fs')
 })
 
 stone.mount('@mount/drive-node/http', ({ state }) => {
-  state.http = require('http')
-  state.https = require('https')
-  state.http2 = require('http2')
+  // state.http = require('http')
+  // state.https = require('https')
+  // state.http2 = require('http2')
 })
 
 stone.mount('@mount/drive-js/console', ({ state }) => {
@@ -300,11 +348,11 @@ stone.mount('@mount/drive-js', function(build){
 stone.mount('@mount/drive-js/mount', function(build){
   const force = build.force
 })
-stone.mount('@mount/drive-js/javascript/base', function(build){
+stone.mount('@mount/drive-js/base', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/base#drive
+   * @mount/drive-js/base#drive
    */
   
   force.drive = function(s, h){
@@ -314,7 +362,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check
+   * @mount/drive-js/base#check
    */
   
   force.check = function(s, h){
@@ -324,7 +372,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-else
+   * @mount/drive-js/base#check-else
    */
   
   force.check_else = function(s, h, o){
@@ -336,7 +384,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#debug-function
+   * @mount/drive-js/base#debug-function
    */
   
   force.debug_function = function(s){
@@ -344,7 +392,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#debug
+   * @mount/drive-js/base#debug
    */
   
   force.debug = function(){
@@ -352,7 +400,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#queue
+   * @mount/drive-js/base#queue
    */
   
   force.queue = function(s){
@@ -360,7 +408,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#compute-bitwise-or
+   * @mount/drive-js/base#compute-bitwise-or
    */
   
   force.compute_bitwise_or = function(s, h){
@@ -368,7 +416,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-if-equal
+   * @mount/drive-js/base#check-if-equal
    */
   
   force.check_if_equal = function(s, h){
@@ -376,7 +424,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-if-strictly-equal
+   * @mount/drive-js/base#check-if-strictly-equal
    */
   
   force.check_if_strictly_equal = function(s, h){
@@ -384,7 +432,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#get-typeof
+   * @mount/drive-js/base#get-typeof
    */
   
   force.get_typeof = function(s){
@@ -392,7 +440,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#get-instanceof
+   * @mount/drive-js/base#get-instanceof
    */
   
   force.get_instanceof = function(s, h){
@@ -400,7 +448,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#set-field
+   * @mount/drive-js/base#set-field
    */
   
   force.set_field = function(s, h, o){
@@ -408,7 +456,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#get-field
+   * @mount/drive-js/base#get-field
    */
   
   force.get_field = function(s, h){
@@ -416,7 +464,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#remove-field
+   * @mount/drive-js/base#remove-field
    */
   
   force.remove_field = function(s, h){
@@ -424,7 +472,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#shift-left
+   * @mount/drive-js/base#shift-left
    */
   
   force.shift_left = function(s, h){
@@ -432,7 +480,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#shift-right
+   * @mount/drive-js/base#shift-right
    */
   
   force.shift_right = function(s, h){
@@ -440,7 +488,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#shift-right-unsigned
+   * @mount/drive-js/base#shift-right-unsigned
    */
   
   force.shift_right_unsigned = function(s, h){
@@ -448,7 +496,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#compute-bitwise-and
+   * @mount/drive-js/base#compute-bitwise-and
    */
   
   force.compute_bitwise_and = function(s, h){
@@ -456,7 +504,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-or
+   * @mount/drive-js/base#check-or
    */
   
   force.check_or = function(s, h){
@@ -464,7 +512,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#try-catch
+   * @mount/drive-js/base#try-catch
    */
   
   force.try_catch = function(s, h){
@@ -476,7 +524,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-if-truthy
+   * @mount/drive-js/base#check-if-truthy
    */
   
   force.check_if_truthy = function(s){
@@ -484,7 +532,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-opposite
+   * @mount/drive-js/base#check-opposite
    */
   
   force.check_opposite = function(s){
@@ -492,7 +540,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-not-equal
+   * @mount/drive-js/base#check-not-equal
    */
   
   force.check_not_equal = function(s, h){
@@ -500,7 +548,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#flip-block
+   * @mount/drive-js/base#flip-block
    */
   
   force.flip_block = function(s){
@@ -508,7 +556,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-gt
+   * @mount/drive-js/base#check-gt
    */
   
   force.check_gt = function(s, h){
@@ -516,7 +564,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-lt
+   * @mount/drive-js/base#check-lt
    */
   
   force.check_lt = function(s, h){
@@ -524,7 +572,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-gte
+   * @mount/drive-js/base#check-gte
    */
   
   force.check_gte = function(s, h){
@@ -532,7 +580,7 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-lte
+   * @mount/drive-js/base#check-lte
    */
   
   force.check_lte = function(s, h){
@@ -540,18 +588,18 @@ stone.mount('@mount/drive-js/javascript/base', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/base#check-and
+   * @mount/drive-js/base#check-and
    */
   
   force.check_and = function(s, h){
     return s && h
   }
 })
-stone.mount('@mount/drive-js/javascript/string', function(build){
+stone.mount('@mount/drive-js/string', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/string#replace
+   * @mount/drive-js/string#replace
    */
   
   force.replace = function(s, h, o){
@@ -559,7 +607,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#trim
+   * @mount/drive-js/string#trim
    */
   
   force.trim = function(s){
@@ -567,7 +615,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#get-char-code-at
+   * @mount/drive-js/string#get-char-code-at
    */
   
   force.get_char_code_at = function(s, h){
@@ -575,7 +623,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#get-char-at
+   * @mount/drive-js/string#get-char-at
    */
   
   force.get_char_at = function(s, h){
@@ -583,7 +631,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#get-char-from-code
+   * @mount/drive-js/string#get-char-from-code
    */
   
   force.get_char_from_code = function(s){
@@ -591,7 +639,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#get-char-from-code-point
+   * @mount/drive-js/string#get-char-from-code-point
    */
   
   force.get_char_from_code_point = function(s){
@@ -599,7 +647,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#convert-to-lowercase
+   * @mount/drive-js/string#convert-to-lowercase
    */
   
   force.convert_to_lowercase = function(s){
@@ -607,7 +655,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#convert-to-uppercase
+   * @mount/drive-js/string#convert-to-uppercase
    */
   
   force.convert_to_uppercase = function(s){
@@ -615,7 +663,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#create
+   * @mount/drive-js/string#create
    */
   
   force.create = function(){
@@ -623,7 +671,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#match
+   * @mount/drive-js/string#match
    */
   
   force.match = function(s, h){
@@ -631,7 +679,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#create-collator
+   * @mount/drive-js/string#create-collator
    */
   
   force.create_collator = function(){
@@ -639,7 +687,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#get-collator-comparator
+   * @mount/drive-js/string#get-collator-comparator
    */
   
   force.get_collator_comparator = function(s){
@@ -647,7 +695,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#split
+   * @mount/drive-js/string#split
    */
   
   force.split = function(s, h){
@@ -655,7 +703,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#check-starts-with
+   * @mount/drive-js/string#check-starts-with
    */
   
   force.check_starts_with = function(s, h){
@@ -663,7 +711,7 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#check-ends-with
+   * @mount/drive-js/string#check-ends-with
    */
   
   force.check_ends_with = function(s, h){
@@ -671,18 +719,18 @@ stone.mount('@mount/drive-js/javascript/string', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/string#pad-start
+   * @mount/drive-js/string#pad-start
    */
   
   force.pad_start = function(s, h, o){
     return s.padStart(h, o)
   }
 })
-stone.mount('@mount/drive-js/javascript/number', function(build){
+stone.mount('@mount/drive-js/number', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/number#parse-decimal
+   * @mount/drive-js/number#parse-decimal
    */
   
   force.parse_decimal = function(s){
@@ -690,7 +738,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#parse-int
+   * @mount/drive-js/number#parse-int
    */
   
   force.parse_int = function(s){
@@ -698,7 +746,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#parse-number
+   * @mount/drive-js/number#parse-number
    */
   
   force.parse_number = function(s){
@@ -706,7 +754,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-max
+   * @mount/drive-js/number#get-max
    */
   
   force.get_max = function(s, h){
@@ -714,7 +762,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-min
+   * @mount/drive-js/number#get-min
    */
   
   force.get_min = function(s, h){
@@ -722,7 +770,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#floor
+   * @mount/drive-js/number#floor
    */
   
   force.floor = function(s){
@@ -730,7 +778,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#ceil
+   * @mount/drive-js/number#ceil
    */
   
   force.ceil = function(s){
@@ -738,7 +786,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#round
+   * @mount/drive-js/number#round
    */
   
   force.round = function(s){
@@ -746,7 +794,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-abs
+   * @mount/drive-js/number#get-abs
    */
   
   force.get_abs = function(s){
@@ -754,7 +802,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-cos
+   * @mount/drive-js/number#get-cos
    */
   
   force.get_cos = function(s){
@@ -762,7 +810,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-acos
+   * @mount/drive-js/number#get-acos
    */
   
   force.get_acos = function(s){
@@ -770,7 +818,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-sin
+   * @mount/drive-js/number#get-sin
    */
   
   force.get_sin = function(s){
@@ -778,7 +826,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-asin
+   * @mount/drive-js/number#get-asin
    */
   
   force.get_asin = function(s){
@@ -786,7 +834,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-tan
+   * @mount/drive-js/number#get-tan
    */
   
   force.get_tan = function(s){
@@ -794,7 +842,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-atan
+   * @mount/drive-js/number#get-atan
    */
   
   force.get_atan = function(s){
@@ -802,7 +850,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-atan2
+   * @mount/drive-js/number#get-atan2
    */
   
   force.get_atan2 = function(s){
@@ -810,7 +858,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-log
+   * @mount/drive-js/number#get-log
    */
   
   force.get_log = function(s){
@@ -818,7 +866,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-sqrt
+   * @mount/drive-js/number#get-sqrt
    */
   
   force.get_sqrt = function(s){
@@ -826,71 +874,71 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#add
+   * @mount/drive-js/number#add
    */
   
   force.add = function(s, h){
-    return null null null
+    return s + h
   }
   
   /**
-   * @mount/drive-js/javascript/number#subtract
+   * @mount/drive-js/number#subtract
    */
   
   force.subtract = function(s, h){
-    return null null null
+    return s - h
   }
   
   /**
-   * @mount/drive-js/javascript/number#multiply
+   * @mount/drive-js/number#multiply
    */
   
   force.multiply = function(s, h){
-    return null null null
+    return s * h
   }
   
   /**
-   * @mount/drive-js/javascript/number#divide
+   * @mount/drive-js/number#divide
    */
   
   force.divide = function(s, h){
-    return null null null
+    return s / h
   }
   
   /**
-   * @mount/drive-js/javascript/number#modulus
+   * @mount/drive-js/number#modulus
    */
   
   force.modulus = function(s, h){
-    return null null null
+    return s % h
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-exponent
+   * @mount/drive-js/number#get-exponent
    */
   
   force.get_exponent = function(s, h){
-    return null null null
+    return s ** h
   }
   
   /**
-   * @mount/drive-js/javascript/number#increment
+   * @mount/drive-js/number#increment
    */
   
   force.increment = function(s){
-    return nullnull
+    return ++s
   }
   
   /**
-   * @mount/drive-js/javascript/number#decrement
+   * @mount/drive-js/number#decrement
    */
   
   force.decrement = function(s){
-    return nullnull
+    return --s
   }
   
   /**
-   * @mount/drive-js/javascript/number#check-if-not-number
+   * @mount/drive-js/number#check-if-not-number
    */
   
   force.check_if_not_number = function(s){
@@ -898,7 +946,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#get-random
+   * @mount/drive-js/number#get-random
    */
   
   force.get_random = function(){
@@ -906,7 +954,7 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/number#loop
+   * @mount/drive-js/number#loop
    */
   
   force.loop = function(s, h, o){
@@ -915,22 +963,22 @@ stone.mount('@mount/drive-js/javascript/number', function(build){
     }
   }
 })
-stone.mount('@mount/drive-js/javascript/function', function(build){
+stone.mount('@mount/drive-js/function', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/function#create
+   * @mount/drive-js/function#create
    */
   
   force.create = function(s){
     return new Function(s)
   }
 })
-stone.mount('@mount/drive-js/javascript/array', function(build){
+stone.mount('@mount/drive-js/array', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/array#get-index-of
+   * @mount/drive-js/array#get-index-of
    */
   
   force.get_index_of = function(s, h){
@@ -938,7 +986,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#create
+   * @mount/drive-js/array#create
    */
   
   force.create = function(){
@@ -946,7 +994,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#create-uint8
+   * @mount/drive-js/array#create-uint8
    */
   
   force.create_uint8 = function(s){
@@ -954,7 +1002,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#create-uint16
+   * @mount/drive-js/array#create-uint16
    */
   
   force.create_uint16 = function(s){
@@ -962,7 +1010,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#create-uint32
+   * @mount/drive-js/array#create-uint32
    */
   
   force.create_uint32 = function(s){
@@ -970,7 +1018,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#create-float32
+   * @mount/drive-js/array#create-float32
    */
   
   force.create_float32 = function(s){
@@ -978,7 +1026,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#push
+   * @mount/drive-js/array#push
    */
   
   force.push = function(s, h){
@@ -986,7 +1034,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#pop
+   * @mount/drive-js/array#pop
    */
   
   force.pop = function(s){
@@ -994,7 +1042,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#shift
+   * @mount/drive-js/array#shift
    */
   
   force.shift = function(s){
@@ -1002,7 +1050,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#unshift
+   * @mount/drive-js/array#unshift
    */
   
   force.unshift = function(s, h){
@@ -1010,7 +1058,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#store
+   * @mount/drive-js/array#store
    */
   
   force.store = function(s, h, o){
@@ -1018,7 +1066,7 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#fetch
+   * @mount/drive-js/array#fetch
    */
   
   force.fetch = function(s, h){
@@ -1026,18 +1074,18 @@ stone.mount('@mount/drive-js/javascript/array', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/array#get-length
+   * @mount/drive-js/array#get-length
    */
   
   force.get_length = function(s){
     return s.null
   }
 })
-stone.mount('@mount/drive-js/javascript/dataview', function(build){
+stone.mount('@mount/drive-js/dataview', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/dataview#build-data-view
+   * @mount/drive-js/dataview#build-data-view
    */
   
   force.build_data_view = function(s, h, o){
@@ -1045,7 +1093,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-int8
+   * @mount/drive-js/dataview#get-int8
    */
   
   force.get_int8 = function(s, h, o){
@@ -1053,7 +1101,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-uint8
+   * @mount/drive-js/dataview#get-uint8
    */
   
   force.get_uint8 = function(s, h, o){
@@ -1061,7 +1109,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-int16
+   * @mount/drive-js/dataview#get-int16
    */
   
   force.get_int16 = function(s, h, o){
@@ -1069,7 +1117,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-uint16
+   * @mount/drive-js/dataview#get-uint16
    */
   
   force.get_uint16 = function(s, h, o){
@@ -1077,7 +1125,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-int32
+   * @mount/drive-js/dataview#get-int32
    */
   
   force.get_int32 = function(s, h, o){
@@ -1085,7 +1133,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-uint32
+   * @mount/drive-js/dataview#get-uint32
    */
   
   force.get_uint32 = function(s, h, o){
@@ -1093,7 +1141,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-float32
+   * @mount/drive-js/dataview#get-float32
    */
   
   force.get_float32 = function(s, h, o){
@@ -1101,7 +1149,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-float64
+   * @mount/drive-js/dataview#get-float64
    */
   
   force.get_float64 = function(s, h, o){
@@ -1109,7 +1157,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-big-int64
+   * @mount/drive-js/dataview#get-big-int64
    */
   
   force.get_big_int64 = function(s, h, o){
@@ -1117,7 +1165,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#get-big-uint64
+   * @mount/drive-js/dataview#get-big-uint64
    */
   
   force.get_big_uint64 = function(s, h, o){
@@ -1125,7 +1173,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-int8
+   * @mount/drive-js/dataview#set-int8
    */
   
   force.set_int8 = function(s, h, o, w){
@@ -1133,7 +1181,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-uint8
+   * @mount/drive-js/dataview#set-uint8
    */
   
   force.set_uint8 = function(s, h, o, w){
@@ -1141,7 +1189,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-int16
+   * @mount/drive-js/dataview#set-int16
    */
   
   force.set_int16 = function(s, h, o, w){
@@ -1149,7 +1197,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-uint16
+   * @mount/drive-js/dataview#set-uint16
    */
   
   force.set_uint16 = function(s, h, o, w){
@@ -1157,7 +1205,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-int32
+   * @mount/drive-js/dataview#set-int32
    */
   
   force.set_int32 = function(s, h, o, w){
@@ -1165,7 +1213,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-uint32
+   * @mount/drive-js/dataview#set-uint32
    */
   
   force.set_uint32 = function(s, h, o, w){
@@ -1173,7 +1221,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-float32
+   * @mount/drive-js/dataview#set-float32
    */
   
   force.set_float32 = function(s, h, o, w){
@@ -1181,7 +1229,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-float64
+   * @mount/drive-js/dataview#set-float64
    */
   
   force.set_float64 = function(s, h, o, w){
@@ -1189,7 +1237,7 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-big-int64
+   * @mount/drive-js/dataview#set-big-int64
    */
   
   force.set_big_int64 = function(s, h, o, w){
@@ -1197,18 +1245,18 @@ stone.mount('@mount/drive-js/javascript/dataview', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/dataview#set-big-uint64
+   * @mount/drive-js/dataview#set-big-uint64
    */
   
   force.set_big_uint64 = function(s, h, o, w){
     s.setBigUint64(h, o, w)
   }
 })
-stone.mount('@mount/drive-js/javascript/console', function(build){
+stone.mount('@mount/drive-js/console', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/console#assert
+   * @mount/drive-js/console#assert
    */
   
   force.assert = function(s, h, o, w){
@@ -1216,7 +1264,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#clear
+   * @mount/drive-js/console#clear
    */
   
   force.clear = function(){
@@ -1224,7 +1272,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#count
+   * @mount/drive-js/console#count
    */
   
   force.count = function(s){
@@ -1232,7 +1280,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#count-reset
+   * @mount/drive-js/console#count-reset
    */
   
   force.count_reset = function(s){
@@ -1240,7 +1288,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#debug
+   * @mount/drive-js/console#debug
    */
   
   force.debug = function(s, h, o){
@@ -1248,7 +1296,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#dir
+   * @mount/drive-js/console#dir
    */
   
   force.dir = function(s){
@@ -1256,7 +1304,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#dirxml
+   * @mount/drive-js/console#dirxml
    */
   
   force.dirxml = function(s){
@@ -1264,7 +1312,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#error
+   * @mount/drive-js/console#error
    */
   
   force.error = function(s, h, o){
@@ -1272,7 +1320,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#group
+   * @mount/drive-js/console#group
    */
   
   force.group = function(s){
@@ -1280,7 +1328,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#group-collapsed
+   * @mount/drive-js/console#group-collapsed
    */
   
   force.group_collapsed = function(s){
@@ -1288,7 +1336,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#group-end
+   * @mount/drive-js/console#group-end
    */
   
   force.group_end = function(){
@@ -1296,7 +1344,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#info
+   * @mount/drive-js/console#info
    */
   
   force.info = function(s, h, o){
@@ -1304,7 +1352,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#log
+   * @mount/drive-js/console#log
    */
   
   force.log = function(s){
@@ -1312,7 +1360,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#table
+   * @mount/drive-js/console#table
    */
   
   force.table = function(s, h){
@@ -1320,7 +1368,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#time
+   * @mount/drive-js/console#time
    */
   
   force.time = function(s){
@@ -1328,7 +1376,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#time-end
+   * @mount/drive-js/console#time-end
    */
   
   force.time_end = function(s){
@@ -1336,7 +1384,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#time-log
+   * @mount/drive-js/console#time-log
    */
   
   force.time_log = function(s){
@@ -1344,7 +1392,7 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#trace
+   * @mount/drive-js/console#trace
    */
   
   force.trace = function(s){
@@ -1352,18 +1400,18 @@ stone.mount('@mount/drive-js/javascript/console', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/console#warn
+   * @mount/drive-js/console#warn
    */
   
   force.warn = function(s, h, o){
     console.warn(s, h, o)
   }
 })
-stone.mount('@mount/drive-js/javascript/datetime', function(build){
+stone.mount('@mount/drive-js/datetime', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/datetime#create
+   * @mount/drive-js/datetime#create
    */
   
   force.create = function(s){
@@ -1371,7 +1419,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#parse
+   * @mount/drive-js/datetime#parse
    */
   
   force.parse = function(s){
@@ -1379,7 +1427,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-millisecond-timestamp
+   * @mount/drive-js/datetime#get-millisecond-timestamp
    */
   
   force.get_millisecond_timestamp = function(){
@@ -1387,7 +1435,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-microsecond-timestamp
+   * @mount/drive-js/datetime#get-microsecond-timestamp
    */
   
   force.get_microsecond_timestamp = function(){
@@ -1395,7 +1443,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-date
+   * @mount/drive-js/datetime#get-date
    */
   
   force.get_date = function(s){
@@ -1403,7 +1451,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-day
+   * @mount/drive-js/datetime#get-day
    */
   
   force.get_day = function(s){
@@ -1411,7 +1459,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-full-year
+   * @mount/drive-js/datetime#get-full-year
    */
   
   force.get_full_year = function(s){
@@ -1419,7 +1467,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-hours
+   * @mount/drive-js/datetime#get-hours
    */
   
   force.get_hours = function(s){
@@ -1427,7 +1475,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-milliseconds
+   * @mount/drive-js/datetime#get-milliseconds
    */
   
   force.get_milliseconds = function(s){
@@ -1435,7 +1483,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-minutes
+   * @mount/drive-js/datetime#get-minutes
    */
   
   force.get_minutes = function(s){
@@ -1443,7 +1491,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-month
+   * @mount/drive-js/datetime#get-month
    */
   
   force.get_month = function(s){
@@ -1451,7 +1499,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-seconds
+   * @mount/drive-js/datetime#get-seconds
    */
   
   force.get_seconds = function(s){
@@ -1459,7 +1507,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-time
+   * @mount/drive-js/datetime#get-time
    */
   
   force.get_time = function(s){
@@ -1467,7 +1515,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-timezone-offset
+   * @mount/drive-js/datetime#get-timezone-offset
    */
   
   force.get_timezone_offset = function(s){
@@ -1475,7 +1523,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-date
+   * @mount/drive-js/datetime#get-utc-date
    */
   
   force.get_utc_date = function(s){
@@ -1483,7 +1531,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-day
+   * @mount/drive-js/datetime#get-utc-day
    */
   
   force.get_utc_day = function(s){
@@ -1491,7 +1539,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-full-year
+   * @mount/drive-js/datetime#get-utc-full-year
    */
   
   force.get_utc_full_year = function(s){
@@ -1499,7 +1547,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-hours
+   * @mount/drive-js/datetime#get-utc-hours
    */
   
   force.get_utc_hours = function(s){
@@ -1507,7 +1555,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-milliseconds
+   * @mount/drive-js/datetime#get-utc-milliseconds
    */
   
   force.get_utc_milliseconds = function(s){
@@ -1515,7 +1563,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-minutes
+   * @mount/drive-js/datetime#get-utc-minutes
    */
   
   force.get_utc_minutes = function(s){
@@ -1523,7 +1571,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-month
+   * @mount/drive-js/datetime#get-utc-month
    */
   
   force.get_utc_month = function(s){
@@ -1531,7 +1579,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-utc-seconds
+   * @mount/drive-js/datetime#get-utc-seconds
    */
   
   force.get_utc_seconds = function(s){
@@ -1539,7 +1587,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-year
+   * @mount/drive-js/datetime#get-year
    */
   
   force.get_year = function(s){
@@ -1547,7 +1595,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-date
+   * @mount/drive-js/datetime#set-date
    */
   
   force.set_date = function(s, h){
@@ -1555,7 +1603,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-full-year
+   * @mount/drive-js/datetime#set-full-year
    */
   
   force.set_full_year = function(s, h){
@@ -1563,7 +1611,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-hours
+   * @mount/drive-js/datetime#set-hours
    */
   
   force.set_hours = function(s, h){
@@ -1571,7 +1619,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-milliseconds
+   * @mount/drive-js/datetime#set-milliseconds
    */
   
   force.set_milliseconds = function(s, h){
@@ -1579,7 +1627,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-minutes
+   * @mount/drive-js/datetime#set-minutes
    */
   
   force.set_minutes = function(s, h){
@@ -1587,7 +1635,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-month
+   * @mount/drive-js/datetime#set-month
    */
   
   force.set_month = function(s, h){
@@ -1595,7 +1643,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-seconds
+   * @mount/drive-js/datetime#set-seconds
    */
   
   force.set_seconds = function(s, h){
@@ -1603,7 +1651,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-time
+   * @mount/drive-js/datetime#set-time
    */
   
   force.set_time = function(s, h){
@@ -1611,7 +1659,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-date
+   * @mount/drive-js/datetime#set-utc-date
    */
   
   force.set_utc_date = function(s, h){
@@ -1619,7 +1667,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-full-year
+   * @mount/drive-js/datetime#set-utc-full-year
    */
   
   force.set_utc_full_year = function(s, h){
@@ -1627,7 +1675,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-hours
+   * @mount/drive-js/datetime#set-utc-hours
    */
   
   force.set_utc_hours = function(s, h){
@@ -1635,7 +1683,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-milliseconds
+   * @mount/drive-js/datetime#set-utc-milliseconds
    */
   
   force.set_utc_milliseconds = function(s, h){
@@ -1643,7 +1691,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-minutes
+   * @mount/drive-js/datetime#set-utc-minutes
    */
   
   force.set_utc_minutes = function(s, h){
@@ -1651,7 +1699,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-month
+   * @mount/drive-js/datetime#set-utc-month
    */
   
   force.set_utc_month = function(s, h){
@@ -1659,7 +1707,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-utc-seconds
+   * @mount/drive-js/datetime#set-utc-seconds
    */
   
   force.set_utc_seconds = function(s, h){
@@ -1667,7 +1715,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#set-year
+   * @mount/drive-js/datetime#set-year
    */
   
   force.set_year = function(s, h){
@@ -1675,7 +1723,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-date-string
+   * @mount/drive-js/datetime#convert-to-date-string
    */
   
   force.convert_to_date_string = function(s){
@@ -1683,7 +1731,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-iso-string
+   * @mount/drive-js/datetime#convert-to-iso-string
    */
   
   force.convert_to_iso_string = function(s){
@@ -1691,7 +1739,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-json
+   * @mount/drive-js/datetime#convert-to-json
    */
   
   force.convert_to_json = function(s){
@@ -1699,7 +1747,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-gmt-string
+   * @mount/drive-js/datetime#convert-to-gmt-string
    */
   
   force.convert_to_gmt_string = function(s){
@@ -1707,7 +1755,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-locale-date-string
+   * @mount/drive-js/datetime#convert-to-locale-date-string
    */
   
   force.convert_to_locale_date_string = function(s){
@@ -1715,7 +1763,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-locale-format
+   * @mount/drive-js/datetime#convert-to-locale-format
    */
   
   force.convert_to_locale_format = function(s){
@@ -1723,7 +1771,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-locale-string
+   * @mount/drive-js/datetime#convert-to-locale-string
    */
   
   force.convert_to_locale_string = function(s){
@@ -1731,7 +1779,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-locale-time-string
+   * @mount/drive-js/datetime#convert-to-locale-time-string
    */
   
   force.convert_to_locale_time_string = function(s){
@@ -1739,7 +1787,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-string
+   * @mount/drive-js/datetime#convert-to-string
    */
   
   force.convert_to_string = function(s){
@@ -1747,7 +1795,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-time-string
+   * @mount/drive-js/datetime#convert-to-time-string
    */
   
   force.convert_to_time_string = function(s){
@@ -1755,7 +1803,7 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#convert-to-utc-string
+   * @mount/drive-js/datetime#convert-to-utc-string
    */
   
   force.convert_to_utc_string = function(s){
@@ -1763,18 +1811,18 @@ stone.mount('@mount/drive-js/javascript/datetime', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/datetime#get-value-of
+   * @mount/drive-js/datetime#get-value-of
    */
   
   force.get_value_of = function(s){
     return s.valueOf()
   }
 })
-stone.mount('@mount/drive-js/javascript/error', function(build){
+stone.mount('@mount/drive-js/error', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/error#get-stack
+   * @mount/drive-js/error#get-stack
    */
   
   force.get_stack = function(s){
@@ -1782,18 +1830,18 @@ stone.mount('@mount/drive-js/javascript/error', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/error#throw
+   * @mount/drive-js/error#throw
    */
   
   force.throw = function(s){
-    throw 
+    throw s
   }
 })
-stone.mount('@mount/drive-js/javascript/interval', function(build){
+stone.mount('@mount/drive-js/interval', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/interval#create
+   * @mount/drive-js/interval#create
    */
   
   force.create = function(s, h){
@@ -1801,18 +1849,18 @@ stone.mount('@mount/drive-js/javascript/interval', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/interval#remove
+   * @mount/drive-js/interval#remove
    */
   
   force.remove = function(s){
     window.clearInterval(s)
   }
 })
-stone.mount('@mount/drive-js/javascript/object', function(build){
+stone.mount('@mount/drive-js/object', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/object#create
+   * @mount/drive-js/object#create
    */
   
   force.create = function(){
@@ -1820,7 +1868,7 @@ stone.mount('@mount/drive-js/javascript/object', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/object#check-if-has-property
+   * @mount/drive-js/object#check-if-has-property
    */
   
   force.check_if_has_property = function(s, h){
@@ -1828,7 +1876,7 @@ stone.mount('@mount/drive-js/javascript/object', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/object#stringify-json
+   * @mount/drive-js/object#stringify-json
    */
   
   force.stringify_json = function(s){
@@ -1836,7 +1884,7 @@ stone.mount('@mount/drive-js/javascript/object', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/object#parse-json
+   * @mount/drive-js/object#parse-json
    */
   
   force.parse_json = function(s){
@@ -1844,7 +1892,7 @@ stone.mount('@mount/drive-js/javascript/object', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/object#get-keys
+   * @mount/drive-js/object#get-keys
    */
   
   force.get_keys = function(s){
@@ -1852,18 +1900,18 @@ stone.mount('@mount/drive-js/javascript/object', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/object#get-values
+   * @mount/drive-js/object#get-values
    */
   
   force.get_values = function(s){
     Object.values(s)
   }
 })
-stone.mount('@mount/drive-js/javascript/regex', function(build){
+stone.mount('@mount/drive-js/regex', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/regex#create
+   * @mount/drive-js/regex#create
    */
   
   force.create = function(s, h){
@@ -1871,18 +1919,18 @@ stone.mount('@mount/drive-js/javascript/regex', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/regex#test
+   * @mount/drive-js/regex#test
    */
   
   force.test = function(s, h){
     return s.test(h)
   }
 })
-stone.mount('@mount/drive-js/javascript/timeout', function(build){
+stone.mount('@mount/drive-js/timeout', function(build){
   const force = build.force
   
   /**
-   * @mount/drive-js/javascript/timeout#create
+   * @mount/drive-js/timeout#create
    */
   
   force.create = function(s, h){
@@ -1890,7 +1938,7 @@ stone.mount('@mount/drive-js/javascript/timeout', function(build){
   }
   
   /**
-   * @mount/drive-js/javascript/timeout#remove
+   * @mount/drive-js/timeout#remove
    */
   
   force.remove = function(s){
@@ -2031,7 +2079,7 @@ stone.mount('@mount/drive-node/assert', function(build){
    */
   
   force.assert_equal = function(s, h, o){
-    null.null()
+    s.equal(h, o)
   }
 })
 stone.mount('@mount/drive-node/buffer', function(build){
@@ -2045,7 +2093,7 @@ stone.mount('@mount/drive-node/child-process', function(build){
    */
   
   force.spawn = function(s, h, o){
-    return null.null()
+    return s.spawn(h, o)
   }
 })
 stone.mount('@mount/drive-node/event', function(build){
@@ -2534,4 +2582,601 @@ stone.mount('@mount/drive-js/datetime', function(build){
     return s.valueOf()
   }
 })
-
+stone.mount('@mount/start/force/check', function(build){
+  const force = build.force
+  force.check = function(){
+  }
+  force.check_state = function(){
+  }
+  force.check_blank = function(s){
+  }
+  force.check_match = function(s, h){
+  }
+  force.check_blank_match = function(s, h){
+  }
+  force.check_floor = function(s, h){
+  }
+  force.check_floor_match = function(s, h){
+  }
+  force.check_crest = function(s, h){
+  }
+  force.check_crest_match = function(s, h){
+  }
+  force.check_blend = function(s, h){
+  }
+  force.check_cross = function(s, h){
+  }
+  force.check_shift_match = function(s, h){
+  }
+  force.check_shift = function(s){
+  }
+})
+stone.mount('@mount/start/force/store', function(build){
+  const force = build.force
+  force.hatch = function(){
+  }
+  force.climb = function(){
+  }
+  force.clear = function(){
+  }
+  force.drive = function(){
+  }
+  force.store = function(){
+  }
+  force.clone = function(){
+  }
+  force.fetch = function(){
+  }
+  force.is_within_range = function(){
+    check_blend()
+  }
+  force.slate = function(s, h, o){
+    clone_count()
+    shift_state_front()
+    break_count()
+    drive_stick_chain_start_shift()
+  }
+  force.allocate_memory_block = function(s, h, o, w, l, i){
+    store()
+    slice_count()
+    round_count_crest()
+    clone_count()
+    pluck()
+    propagate()
+    throw()
+  }
+  force.pluck = function(s, h, o, w, l){
+    check_match()
+  }
+  force.propagate = function(s, h, o, w, l){
+    clear_count()
+    check_crest()
+  }
+  force.bin_remove = function(){
+  }
+  force.set_key_value_bin = function(){
+  }
+})
+stone.mount('@mount/start/force/track', function(build){
+  const force = build.force
+  force.shift_track = function(s){
+  }
+})
+stone.mount('@mount/start/force/count', function(build){
+  const force = build.force
+  force.mount = function(){
+  }
+  force.clear = function(){
+  }
+  force.clone = function(){
+  }
+  force.slice = function(){
+  }
+  force.clock = function(){
+  }
+  force.raise = function(){
+  }
+  force.floor = function(){
+  }
+  force.round = function(){
+  }
+  force.round_crest = function(){
+  }
+  force.round_floor = function(){
+  }
+  force.fetch_floor = function(){
+  }
+  force.fetch_crest = function(){
+  }
+  force.hatch = function(){
+  }
+  force.hatch_bound = function(){
+  }
+  force.break = function(){
+  }
+  force.scale = function(){
+  }
+  force.slant_wheel = function(){
+  }
+  force.slant_wheel_shift = function(){
+  }
+  force.slant_wheel_shift_2 = function(){
+  }
+  force.climb_wheel = function(){
+  }
+  force.climb_wheel_shift = function(){
+  }
+  force.cross_wheel = function(){
+  }
+  force.cross_wheel_shift = function(){
+  }
+  force.fetch_house = function(){
+  }
+  force.block = function(){
+  }
+})
+stone.mount('@mount/start/force/drive', function(build){
+  const force = build.force
+  force.start = function(){
+  }
+  force.mount_0 = function(s){
+  }
+  force.mount_1 = function(s, h, o){
+  }
+  force.mount_2 = function(s, h, o, w, l){
+  }
+  force.mount_3 = function(s, h, o, w, l, i, n){
+  }
+  force.mount_4 = function(s, h, o, w, l, i, n, k, d){
+  }
+  force.mount_5 = function(s, h, o, w, l, i, n, k, d, r, u){
+  }
+  force.mount_6 = function(s, h, o, w, l, i, n, k, d, r, u, m, b){
+  }
+  force.mount_7 = function(s, h, o, w, l, i, n, k, d, r, u, m, b, e, a){
+  }
+  force.mount_0_shift = function(s, h){
+  }
+  force.mount_1_shift = function(s, h, o, w){
+  }
+  force.mount_2_shift = function(s, h, o, w, l, i){
+  }
+  force.mount_3_shift = function(s, h, o, w, l, i, n, k){
+  }
+  force.mount_4_shift = function(s, h, o, w, l, i, n, k, d, r){
+  }
+  force.mount_5_shift = function(s, h, o, w, l, i, n, k, d, r, u, m){
+  }
+  force.mount_6_shift = function(s, h, o, w, l, i, n, k, d, r, u, m, b, e){
+  }
+  force.mount_7_shift = function(s, h, o, w, l, i, n, k, d, r, u, m, b, e, a, t){
+  }
+  force.shift_match = function(s, h, o){
+  }
+  force.shift_shift_match = function(s, h, o){
+  }
+  force.shift_crest = function(s, h, o){
+  }
+  force.shift_floor = function(s, h, o){
+  }
+  force.shift_crest_match = function(s, h, o){
+  }
+  force.shift_floor_match = function(s, h, o){
+  }
+  force.shift = function(s){
+  }
+  force.store_mount_share = function(s, h){
+  }
+  force.store_mount_drive_share = function(s, h){
+  }
+  force.store_mount_build_share = function(s, h){
+  }
+  force.store_mount_build = function(s, h){
+  }
+  force.store_build_mount_share = function(s, h){
+  }
+  force.store_build_drive_share = function(s, h){
+  }
+  force.store_build_build = function(s, h){
+  }
+  force.fetch_drive = function(){
+  }
+  force.mount_drive = function(s){
+  }
+  force.clear_drive = function(){
+  }
+  force.cause = function(s){
+  }
+  force.store_latch_drive_latch = function(s, h){
+  }
+  force.store_latch_drive_build = function(s, h){
+  }
+  force.store_latch_drive_mount = function(s, h){
+  }
+  force.fetch_build = function(s){
+  }
+  force.fetch_mount = function(s){
+  }
+  force.fetch = function(s){
+  }
+  force.mount_build = function(s){
+  }
+  force.clear_build = function(){
+  }
+})
+stone.mount('@mount/start/force/chain', function(build){
+  const force = build.force
+  force.store = function(s, h){
+  }
+  force.fetch = function(s, h){
+  }
+  force.slice = function(s, h){
+  }
+  force.drive = function(s){
+  }
+  force.drive_start_front = function(s){
+  }
+  force.slice_chunk = function(s, h, o){
+  }
+  force.slice_front = function(s){
+  }
+  force.mount_front = function(s, h){
+  }
+  force.mount_start = function(s, h){
+  }
+  force.shift = function(s){
+  }
+  force.clean = function(s){
+  }
+  force.mount = function(s, h){
+  }
+  force.fetch_start = function(s){
+  }
+  force.fetch_front = function(s){
+  }
+  force.fetch_count = function(s){
+  }
+  force.fetch_slice = function(s, h, o){
+  }
+  force.break = function(s, h){
+  }
+  force.chunk = function(s, h){
+  }
+  force.match_blend = function(){
+  }
+  force.match_cross = function(){
+  }
+  force.check_house_block = function(s, h){
+  }
+  force.fetch_block_slate = function(s, h){
+  }
+  force.match = function(s, h){
+  }
+})
+stone.mount('@mount/start/force/stick/hatch', function(build){
+  const force = build.force
+  force.clear_latch_black_match = function(s, h, o){
+    check_blend()
+  }
+  force.fetch = function(s, h){
+    store()
+    store()
+    drive()
+    check_cross()
+  }
+  force.build_latch = function(s){
+    drive()
+  }
+  force.wipe = function(s, h, o){
+    clear_chain()
+    build_latch_check_shift()
+  }
+  force.build_latch_check_shift = function(s, h){
+    check_match()
+  }
+  force.crawl = function(s, h){
+    store()
+    store()
+    drive()
+    clear_count()
+  }
+  force.shift = function(s, h, o, w, l){
+    shift_start()
+    check_match()
+  }
+  force.move_to_front = function(s, h){
+    clear_count()
+    shift()
+  }
+  force.move_from_front = function(s, h){
+    shift()
+  }
+})
+stone.mount('@mount/start/force/stick/chain', function(build){
+  const force = build.force
+  force.fetch = function(s, h){
+    reach()
+    check_floor()
+  }
+  force.reach = function(s, h){
+    store()
+    check_floor()
+    check_floor()
+    clear_count()
+    check_crest_match()
+    drive()
+    build()
+    store()
+    store()
+  }
+  force.store = function(s, h, o){
+    reach()
+    store()
+    store()
+    drive()
+    insert_to_layer()
+  }
+  force.remove_item_at = function(s, h){
+    reach()
+    store()
+    store()
+    check_crest_match()
+    store()
+    drive()
+  }
+  force.mount_front = function(s, h){
+    store()
+  }
+  force.clear_front = function(s){
+    remove_item_at()
+  }
+  force.unshift = function(s, h){
+    store()
+  }
+  force.shift = function(s){
+    remove_item_at()
+  }
+  force.try_to_rebase_on_insert = function(s, h){
+    check_shift_match()
+  }
+  force.try_shift_left_on_insert = function(s, h, o, w){
+    is_available_to_move_left()
+  }
+  force.is_available_to_move_left = function(s, h, o){
+    check_cross()
+  }
+  force.move = function(s, h, o, w, l){
+    shift_start()
+  }
+  force.move_to_next = function(s, h){
+    clear_count()
+    move()
+  }
+  force.move_from_next = function(s, h){
+    move()
+  }
+  force.drive_stick_chain_start_shift = function(){
+  }
+})
+stone.mount('@mount/start/force/stick', function(build){
+  const force = build.force
+  force.pair_with_smallest = function(s){
+    check_cross()
+  }
+  force.is_fill_ratio_fine = function(s, h){
+    clone_count()
+    check_crest()
+  }
+  force.split_node = function(s, h, o, w){
+    shift_state_front()
+    check_match()
+    check_match()
+    shift()
+    insert_into_sibling()
+    throw()
+  }
+  force.clear_chain = function(s, h, o){
+    build_stick_scale()
+    copy_within()
+    clear_count()
+    mount_count()
+    drive()
+    clear_count()
+    floor_count()
+  }
+  force.build_stick_scale = function(s, h, o, w){
+    store()
+    check_match()
+    check_match()
+    clone_count()
+    drive()
+  }
+  force.remove_node_from_layer = function(s, h){
+    check_shift_match()
+    mount_count()
+    wipe()
+  }
+  force.insert_to_layer = function(s, h, o){
+    shift()
+    check_match()
+  }
+  force.wipe_layer = function(s, h, o){
+    build_stick_scale()
+    copy_within()
+    clear_count()
+    mount_count()
+    store()
+    drive()
+    clear_count()
+    clear_count()
+  }
+  force.try_to_rebase_on_remove = function(s, h, o, w){
+    check_blend()
+  }
+  force.try_to_merge_or_redistribute_on_remove = function(s, h, o, w){
+    mount_count()
+    shift_state_front()
+    check_crest()
+  }
+  force.try_to_redistribute = function(s, h, o, w){
+    check_match()
+    pair_with_smallest()
+    store()
+    store()
+    check_match()
+    mount_count()
+    clone_count()
+    check_floor_match()
+  }
+  force.move_from = function(s, h, o, w, l){
+    shift_start()
+  }
+  force.move_to_next = function(s, h){
+    clear_count()
+    move_from()
+  }
+  force.move_from_next = function(s, h){
+    move_from()
+  }
+  force.is_at_capacity = function(s, h){
+    check_match()
+  }
+  force.copy_within = function(){
+    clear_count()
+    check_floor()
+    raise()
+  }
+  force.shift_start = function(s, h, o, w, l){
+    mount_count()
+    fetch_crest_count()
+    copy_within()
+    raise_count()
+    check_shift_match()
+    mount_count()
+    build_stick_scale()
+    check_shift_match()
+  }
+  force.shift = function(){
+  }
+  force.insert_into_sibling = function(){
+  }
+  force.wipe = function(){
+  }
+})
+stone.mount('@mount/start/force/clock', function(build){
+  const force = build.force
+  force.add = function(){
+  }
+  force.get = function(){
+  }
+  force.still = function(){
+  }
+  force.fetch = function(){
+  }
+  force.start = function(){
+  }
+  force.clear = function(){
+  }
+  force.build = function(){
+  }
+  force.fetch_clock_state_shift_2 = function(){
+  }
+  force.fetch_clock_state_shift_1 = function(){
+  }
+  force.fetch_clock_state_0 = function(){
+  }
+  force.fetch_clock_state_1 = function(){
+  }
+  force.fetch_clock_state_2 = function(){
+  }
+  force.fetch_clock_state_3 = function(){
+  }
+  force.fetch_clock_state_4 = function(){
+  }
+  force.fetch_clock_state_5 = function(){
+  }
+  force.fetch_clock_state_6 = function(){
+  }
+  force.fetch_clock_state_7 = function(){
+  }
+})
+stone.mount('@mount/start/force/write', function(build){
+  const force = build.force
+  force.write = function(){
+  }
+  force.drive = function(s){
+  }
+})
+stone.mount('@mount/start/force/state/chain', function(build){
+  const force = build.force
+  force.blend = function(){
+  }
+  force.cross = function(){
+  }
+  force.shift_start = function(){
+  }
+  force.shift_front = function(){
+  }
+  force.shift_front_count = function(){
+  }
+  force.drift = function(){
+  }
+  force.twist = function(){
+  }
+})
+stone.mount('@mount/start/force/state', function(build){
+  const force = build.force
+  force.store = function(){
+    shift_start()
+    blend()
+  }
+  force.check = function(){
+    shift_start()
+    cross()
+    check_shift_match()
+  }
+  force.clear = function(){
+  }
+  force.shift = function(){
+  }
+})
+stone.mount('@mount/start/force/shard', function(build){
+  const force = build.force
+  force.fetch_block_count = function(){
+  }
+  force.drive = function(s){
+    store()
+    drive()
+  }
+})
+stone.mount('@mount/start/force/force', function(build){
+  const force = build.force
+  force.still = function(){
+  }
+  force.throw = function(){
+  }
+  force.store = function(){
+  }
+  force.raise = function(){
+  }
+  force.stack = function(){
+  }
+  force.drive = function(){
+  }
+  force.build = function(){
+  }
+})
+stone.mount('@mount/stone/check', function(build){
+  const force = build.force
+  force.find_fibonacci_via_loop = function(s){
+    store()
+    store()
+    store()
+    store()
+    drive()
+    raise()
+  }
+  force.find_fibonacci_via_recursion = function(s, h, o){
+    check_blank()
+  }
+})

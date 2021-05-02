@@ -1,6 +1,54 @@
 
 const global = typeof window == 'undefined' ? global : window
 
+
+
+function Stone() {
+  this.store = {}
+}
+
+Stone.prototype.sheet = function(trace){
+  const stack = trace.split('/')
+  let count = 0
+  let store = this.store
+  let sheet
+  while (count < stack.length) {
+    const block = stack[count]
+    sheet = store[block] = store[block] || new Store(block)
+    store = sheet.store
+    count++
+  }
+  return sheet
+}
+
+Stone.prototype.mount = function(trace, mount){
+  this.sheet(trace).mount(mount)
+  return this
+}
+
+Stone.prototype.fetch = function(trace){
+  return this.sheet(trace)
+}
+
+Stone.prototype.clear = function(trace){
+
+}
+
+function Store(trace) {
+  this.trace = trace
+  this.store = {}
+  this.force = {}
+  this.field = {}
+  this.state = {}
+}
+
+Store.prototype.mount = function(force){
+  force(this)
+  return this
+}
+
+const stone = new Stone
+
 class KeyValue {
   constructor(key, value) {
       this.key = key;
@@ -260,13 +308,13 @@ class KeyValueTree {
 global.stone = stone
 
 stone.mount('@mount/drive-node/fs', ({ state }) => {
-  state.fs = require('fs')
+  // state.fs = require('fs')
 })
 
 stone.mount('@mount/drive-node/http', ({ state }) => {
-  state.http = require('http')
-  state.https = require('https')
-  state.http2 = require('http2')
+  // state.http = require('http')
+  // state.https = require('https')
+  // state.http2 = require('http2')
 })
 
 stone.mount('@mount/drive-js/console', ({ state }) => {

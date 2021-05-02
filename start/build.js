@@ -12,6 +12,7 @@ const parseBuildSheet = require('./parse-objects/parseBuildSheet')
 const parseMatchSheet = require('./parse-objects/parseMatchSheet')
 const parseTraceSheet = require('./parse-objects/parseTraceSheet')
 const writeJSDriverSheet = require('./write-objects/writeJSDriverSheet')
+const writeJSForces = require('./write-objects/writeJSForces')
 const writeJSModules = require('./write-objects/writeJSModules')
 const injectTheme = require('./compile-objects/injectTheme')
 const compileCloud = require('./compile-objects/compileCloud')
@@ -89,6 +90,10 @@ const start = () => {
 
   // const mappings = shared.fetchMatchBase(chain, /mapping/)
   // mappings.forEach(parseDriveMountSheet)
+  const forces = []
+  forces.push(...shared.fetchMatchBase(chain, /@mount\/start\/force/))
+  forces.push(...shared.fetchMatchBase(chain, /@mount\/stone\/check/))
+
   const builds = []
   builds.push(...shared.fetchMatchBase(chain, /@mount\/start\/field/))
   builds.push(...shared.fetchMatchBase(chain, /@mount\/start\/force/))
@@ -101,7 +106,6 @@ const start = () => {
   const matches = shared.fetchMatchBase(chain, /@mount\/start\/match/)
   matches.forEach(parseMatchSheet)
   const cloud = buildCloud(chain)
-  compileSheets
   // compileFetch(chain)
   // const forceHouses = compileTypes(chain)
   // const mountMap = compileMount(drivers, mappings)
@@ -112,7 +116,8 @@ const start = () => {
   // giveIds(startTree)
   // const buildingBlocks = buildBlocks(startNode)
   const jsBody = drivers.map(writeJSDriverSheet).join('')
-  const jsHeader = writeJSDriverSheet.writeHeader([], jsBody).join('')
+  const jsBody2 = forces.map(writeJSForces).join('\n')
+  const jsHeader = writeJSDriverSheet.writeHeader([], jsBody + jsBody2).join('')
   // const jsFooter = writeJSDriverSheet.writeFooter().join('\n')
   const js = [jsHeader].join('')
   fs.writeFileSync(`build/build.js`, js)
