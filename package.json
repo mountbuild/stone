@@ -1,0 +1,9 @@
+{
+  "name": "@mountbuild/stone",
+  "description": "The XO Compiler",
+  "version": "1.0.0",
+  "main": "trace/verse.js",
+  "files": [
+    "trace/verse.js"
+  ]
+}
