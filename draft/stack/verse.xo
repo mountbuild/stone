@@ -1,0 +1,4 @@
+
+A stack takes a title (brief), a description (write), tags (brand), author (touch), and specifies where in the code the entrypoint is.
+
+A stack is compiled into a graph data structure, which is represented/rendered in Xo code as trees of text.

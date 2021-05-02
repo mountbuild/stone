@@ -1,0 +1,10 @@
+
+text |In the front you define matchers on the sheets and batchers which transform the matched data into the desired format.|
+
+text |One of the major goals with the Xo language is to make it easy to intuitively capture data. To write things down in a computer readable and yet human readable way. To do this you have to write themes for your sheets. A theme is essentially a sheet type, which is used to compile the sheet into the graph. Or rather, once we have the data in place, the theme tells us how to convert the underlying graph data back into Xo code (the "show").|
+
+text |You want to try to minimize the number of different themes you have to create, instead aiming to come up with a generalized abstraction that can apply to all pieces of data of a certain type. This way you only have to learn a few themes, and can read all the data in Xo format. At the same time, you might want to opt for more themes, because you can intuitively describe some aspect of data in a more concise, compact, and elegant way using some custom Xo theme you come up with. There is a balance there. A key thing to realize is that what you are really doing is building a general graph database, and rendering the graph database into various trees of text (the Xo code).|
+
+text |This is the reason we have the simple "block" theme, a theme used to create rectangular shapes for a digital user interface. Rather than having one theme for circles and one for squares, etc., we have a generic one for "blocks" of the UI.|
+
+text |You may make your themes composable, so you can reuse an existing theme chunk in another theme. This is what we have done with the build theme used inside the block theme. Inside the block theme you can also create forces and fields as you like, etc.|

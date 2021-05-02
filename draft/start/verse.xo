@@ -1,0 +1,10 @@
+
+text |Welcome to The Stone Book, where you will learn how to create and share custom stacks with yourself, your teams, and the open world.|
+
+text |To get started, download the :c(|stone|) compiler. You can host your code and data on stone.dance, the cloud platform for Xo stacks.|
+
+text |A Xo :c(|stack|) is a package of code and/or data that can be loaded into another stack. A code stack can be an application or a library or just a function, while a data stack can be an entire application database or just a small set of data. There is no difference between a code and a data stack, there are just stacks. We just point out the difference to show what's possible.|
+
+text |The stack also points to the mount, which is what is used to apply themes to different sheets in your stack. Each theme tells us how to parse the sheet and construct data out of it. In the reverse, it tells us how to construct a sheet out of underlying data. It tells us what our initial structures are in the sheet, as well as the hatches which tell us how to parse Xo trees (sticks) into Xo graphs (weaves).|
+
+text |After defining the mount which tells how to compile the sheets, we define the public interface to the stack. This public interface is like a REST API to the stack, which tells us how you can use the underlying sheet data. This means we don't need to define public/private forces, etc., inside each sheet, but can define as a whole what is shared. This is done in the :c(|front|) folder of the stack.|

@@ -1,0 +1,36 @@
+
+head |The :c(|build|) sheet|
+  list flat
+    slab |The :c(|fetch|) block|
+    slab |The :c(|force|) block|
+    slab |The :c(|field|) block|
+    slab |The :c(|cause|) block|
+    slab |The :c(|state|) block|
+    slab |The :c(|mount|) block|
+    slab |The :c(|shift|) block|
+
+  head |The :c(|mount|) block|
+    text |This makes the :c(|force store|) public in a sheet:|
+
+    code xo
+      |
+        mount force store
+      |
+
+    text |That is short for the following:|
+
+    code xo
+      |
+        mount force store
+          share force store
+      |
+
+    text |If you want to rename something, you can:|
+
+    code xo
+      |
+        mount force my-store
+          share force store
+      |
+
+The :c(|shift|) is creating a field out of a block. It transforms one thing into the next.

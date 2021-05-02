@@ -1,0 +1,23 @@
+
+head |The :c(|stone|) book|
+  auth |Lance Pollard|
+  mail |earth@mount.build|
+
+slab |The keys|
+  text |There are 20 key pieces to the stone.|
+
+  list flat
+    slab |The :c(|build|) sheet|
+    slab |The :c(|hatch|) sheet|
+    slab |The :c(|theme|) sheet|
+    slab |The :c(|mount|) sheet|
+    slab |The :c(|front|) sheet|
+    slab |The :c(|block|) sheet|
+    slab |The :c(|write|) sheet|
+    slab |The :c(|trace|) sheet|
+    slab |The :c(|state|) sheet|
+    slab |The :c(|draft|) sheet|
+    slab |The :c(|stack|) sheet|
+    slab |The :c(|match|) sheet|
+
+The match sheet is for defining queries on the underlying data.

@@ -1,0 +1,4 @@
+
+text |The :c(|write|) tells you how to generate text from a graph object.|
+
+text |The :c(|write|) may be different than a corresponding :c(|trace|).|
