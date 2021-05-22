@@ -6,17 +6,11 @@ force find-fibonacci-via-loop
   state o, 1
   state d
 
-  state v
-
   cause drive
     catch check
       cause check-state
-        mount build, share v
-        raise build
-    catch front
-      cause floor-count
-        mount count, share i
-        store i
+        mount build, share i
+        leave build
     catch shift
       store d, share o
       cause mount-count
@@ -24,8 +18,11 @@ force find-fibonacci-via-loop
         mount front, share d
         store o
       store g, share d
+      cause floor-count
+        mount count, share i
+        store i
 
-  raise build, share g
+  leave build, share g
 
 force find-fibonacci-via-recursion
   start i
@@ -35,7 +32,7 @@ force find-fibonacci-via-recursion
   cause check-blank
     mount block, share i
     catch match
-      raise build, share g
+      leave build, share g
     catch fault
       cause clear-count
         mount start, share i
@@ -49,7 +46,7 @@ force find-fibonacci-via-recursion
         mount i, share d
         mount g, share o
         mount o, share t
-        raise build
+        leave build
 
 check write
   cause mount-count

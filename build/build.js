@@ -3172,9 +3172,7 @@ stone.mount('@mount/stone/check', function(build){
     store()
     store()
     store()
-    store()
     drive()
-    raise()
   }
   force.find_fibonacci_via_recursion = function(s, h, o){
     check_blank()

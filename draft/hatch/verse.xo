@@ -1,3 +1,47 @@
 
 text |The :c(|hatch|) tells you how to compile a specific tree in Xo.|
 
+text |The hatch begins with the parsed tree of text in verse format. This verse stick is matched against to build the weave.|
+
+code xo
+  |
+    hatch cause
+
+    match cause
+      match brand, brand cause
+        match brand
+          throw brand
+        match chain, match field, field mount
+        match chain, match field, field catch
+        match sieve
+          match crown
+            match field, field store
+            match field, field state
+            match field, field still
+            match field, field stack
+            match field, field throw
+        throw cause
+
+    catch cause
+      catch brand, store brand
+      catch mount, field mount
+        stack mount
+      catch catch, field catch
+        stack catch
+      catch state, field state
+        store state
+      catch store, field store
+        store state
+      catch store, field still
+        store state
+      catch stack, field stack
+        store state
+      catch throw, field throw
+        store state
+      build cause
+        mount brand, share brand
+        mount mount, share mount
+        mount catch, share catch
+        mount state, share state
+        throw build
+  |

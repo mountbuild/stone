@@ -26,6 +26,8 @@ function parseHatch(sheet) {
     }
   })
 
+  require('fs').writeFileSync(`build/hatch-${sheet.sheet.replace(/\//g, '-')}.json`, JSON.stringify(sheet, null, 2))
+
   if (!Object.keys(sheet.hatch).length) {
     throw sheet.trace
   }
@@ -46,7 +48,7 @@ function parseHatch_hatch(sheet, verse) {
 function parseHatch_match(sheet, verse) {
   const brand = shared.getBrandFromFirst(verse)
   const match = {
-    field: `match`,
+    field: `@mount/start/field/hatch/match`,
     brand,
     match: []
   }
@@ -81,7 +83,7 @@ function parseHatch_match_match(sheet, verse) {
 
 function parseHatch_match_match_crown(sheet, verse) {
   const match = {
-    field: `match-crown`,
+    field: `@mount/start/field/hatch/match/crown`,
     match: []
   }
   verse.verse.slice(1).forEach(verse => {
@@ -97,7 +99,7 @@ function parseHatch_match_match_crown(sheet, verse) {
 
 function parseHatch_match_match_chain(sheet, verse) {
   const match = {
-    field: `match-chain`,
+    field: `@mount/start/field/hatch/match/chain`,
     match: []
   }
   verse.verse.slice(1).forEach(verse => {
@@ -113,7 +115,7 @@ function parseHatch_match_match_chain(sheet, verse) {
 
 function parseHatch_match_match_sieve(sheet, verse) {
   const match = {
-    field: `match-sieve`,
+    field: `@mount/start/field/hatch/match/sieve`,
     match: []
   }
   verse.verse.slice(1).forEach(verse => {
@@ -129,7 +131,7 @@ function parseHatch_match_match_sieve(sheet, verse) {
 
 function parseHatch_match_match_weave(sheet, verse) {
   const match = {
-    field: `match-weave`,
+    field: `@mount/start/field/hatch/match/weave`,
     match: []
   }
   verse.verse.slice(1).forEach(verse => {
@@ -145,7 +147,7 @@ function parseHatch_match_match_weave(sheet, verse) {
 
 function parseHatch_match_match_write(sheet, verse) {
   const match = {
-    field: `match-write`
+    field: `@mount/start/field/hatch/match/write`
   }
   let write
   let throwing
@@ -169,7 +171,7 @@ function parseHatch_match_match_write(sheet, verse) {
 
 function parseHatch_match_match_field(sheet, verse) {
   const match = {
-    field: `match-field`
+    field: `@mount/start/field/hatch/match/field`
   }
   let matchField
   let throwing
@@ -190,7 +192,7 @@ function parseHatch_match_match_field(sheet, verse) {
 
 function parseHatch_match_match_brand(sheet, verse) {
   const match = {
-    field: `match-brand`,
+    field: `@mount/start/field/hatch/match/brand`,
     match: []
   }
   let matchBrand
@@ -217,9 +219,10 @@ function parseHatch_match_match_brand(sheet, verse) {
 function parseHatch_catch(sheet, verse) {
   const brand = shared.getBrandFromFirst(verse)
   const _catch = {
-    field: `catch`,
+    field: `@mount/start/field/hatch/catch`,
     brand,
-    catch: []
+    catch: [],
+    build: null
   }
   sheet.catch[brand] = _catch
   verse.verse.slice(1).forEach(verse => {
@@ -239,7 +242,7 @@ function parseHatch_catch(sheet, verse) {
 function parseHatch_catch_catch(sheet, verse) {
   const brand = shared.getBrandFromFirst(verse)
   const _catch = {
-    field: `catch`,
+    field: `@mount/start/field/hatch/catch/catch`,
     brand,
     catchField: undefined,
     catch: [],
@@ -275,7 +278,7 @@ function parseHatch_catch_catch(sheet, verse) {
 function parseHatch_catch_store(sheet, verse) {
   const trace = shared.getPathFromFirst(verse)
   const cause = {
-    field: `cause`,
+    field: `@mount/start/field/cause`,
     brand: `store`,
     mount: [
       {
