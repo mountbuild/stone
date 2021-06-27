@@ -12,7 +12,6 @@ const parse = verse => {
         break
     }
   })
-  fs.writeFileSync('build/1.json', JSON.stringify(result, null, 2))
   return result
 }
 
