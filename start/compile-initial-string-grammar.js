@@ -191,8 +191,27 @@ const parseMatch = verse => {
     case `crown`: return parseMatchCrown(verse)
     case `shift`: return parseMatchShift(verse)
     case `write`: return parseMatchWrite(verse)
+    case `check`: return parseMatchCheck(verse)
     default: throw new Error(`oops: ${brand}`)
   }
+}
+
+const parseMatchCheck = verse => {
+  const trace = {
+    field: `trace-churn-match-check`,
+    start: [],
+    churn: []
+  }
+
+  verse.verse.slice(1).forEach(verse => {
+    switch (verse.brand) {
+      case `start`:
+        trace.start.push(parseStart(verse))
+        break
+    }
+  })
+
+  return trace
 }
 
 const parseMatchWrite = verse => {
@@ -379,3 +398,4 @@ const parseMount = verse => {
 }
 
 module.exports = parse
+parse.mount = parseMount

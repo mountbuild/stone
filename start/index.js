@@ -8,11 +8,11 @@ const compileInitialXoTreeGrammar = require('./compile-initial-xo-tree-grammar')
 
 const start = () => {
   // initialization
-  const showGrammarString = read(`../content-grammar/stack/xo`)
+  const showGrammarString = read(`../content/stack/xo/match`)
   const parsedShowGrammarTree = parseInitialShowString(showGrammarString)
   const compiledShowGrammar = compileInitialStringGrammar(parsedShowGrammarTree)
 
-  const showBuilderString = read(`../content-ast-generator/stack/xo/catch`)
+  const showBuilderString = read(`../content/stack/xo/build/weave`)
   const parsedShowBuilderTree = parseInitialShowString(showBuilderString)
   const compiledShowBuilder = compileInitialStringBuilder(parsedShowBuilderTree)
   console.log(compiledShowBuilder)
