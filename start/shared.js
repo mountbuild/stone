@@ -1,12 +1,33 @@
 
-const parseBuildValue = require('./parse-objects/parseBuildValue')
-
 function getBrand(verse) {
   return verse.verse[0].brand
 }
 
 function getPathFromFirst(verse) {
   return verse.verse[0].brand.trim()
+}
+
+function parseBuild(verse) {
+  switch (verse.brand) {
+    case `write`:
+      const write = verse.verse[0].brand.trim()
+      if (write.match(/^\d+$/)) {
+        return { field: 'integer', build: parseInt(write, 10) }
+      } else if (write.match(/^\d+\.\d+$/)) {
+        return { field: 'decimal', build: parseFloat(write) }
+      } else if (write.match(/^#(\w)(\w+)$/)) {
+        return { field: 'code', class: RegExp.$1, build: RegExp.$2 }
+      } else {
+        const string = getStringFromFirst(verse)
+        return { field: 'template', build: string }
+      }
+    case `share`:
+      const path = getPathFromFirst(verse)
+      return { field: 'share', trace: path }
+      break
+    default:
+      throw new Error(JSON.stringify(verse))
+  }
 }
 
 function getBrandFromFirst(verse) {
@@ -127,5 +148,6 @@ module.exports = {
   fetchMatchTrace,
   fetchMatchBase,
   buildRaiseThrow,
-  parseStateStoreStack
+  parseStateStoreStack,
+  parseBuild
 }

@@ -1,0 +1,4 @@
+
+const parse = (generalHatchGrammar, verse) => {
+
+}

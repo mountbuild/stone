@@ -321,24 +321,24 @@ stone.mount('@mount/drive-js/console', ({ state }) => {
   state.console = console
 })
 
-stone.mount('@mount/start/force/store', ({ force }) => {
+stone.mount('@mountbuild/drive/force/store', ({ force }) => {
   force.build = () => new Store
   force.store = (store, block) => store.store(block)
   force.fetch = (store, match) => store.fetch(match)
   force.clear = (store, match) => store.clear(match)
 })
 
-stone.mount('@mount/start/store/stack', ({ force }) => {
+stone.mount('@mountbuild/drive/store/stack', ({ force }) => {
   force.build = () => new Stack
   force.mount = (store, stack) => store.mount_stack(stack)
   force.clear = (store, stack) => store.clear_stack(stack)
 })
 
-stone.mount('@mount/start/store/stack/cache', ({ force }) => {
+stone.mount('@mountbuild/drive/store/stack/cache', ({ force }) => {
   force.build = (mount) => new Cache(mount)
 })
 
-stone.mount('@mount/start/store/weave', ({ force }) => {
+stone.mount('@mountbuild/drive/store/weave', ({ force }) => {
   force.build = () => new Weave()
 })
 

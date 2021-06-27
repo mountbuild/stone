@@ -24,7 +24,7 @@ write |hello world|
 That is actually shorthand for the following. The following explicitly imports the `write` force, and calls it as a cause. The `write` verse just syntactic sugar.
 
 ```xo
-fetch @mount/start/write
+fetch @mountbuild/drive/write
   catch force write
 
 cause write
@@ -44,7 +44,7 @@ stack @rabbit/tunnel
 And the `./mount/verse.xo` is define like this:
 
 ```
-fetch @mount/start/theme/build
+fetch @mountbuild/drive/theme/build
   catch theme build
 
 mount build

@@ -12,15 +12,19 @@ const trace = (chord) => {
   while (place < chord.length) {
     var start = place
     var point = chord[place++]
-    var front = chord[place]
     if (point === '\n') {
       climb++
     } else {
       slice++
     }
     if (point.match(/[^' ,\(\)\n]/)) {
-      if (point === '\\') {
-        backslash = true
+      if (point === "\\") {
+        if (backslash) {
+          block.push(point)
+          backslash = false
+        } else {
+          backslash = true
+        }
       } else {
         block.push(point)
       }
@@ -30,6 +34,10 @@ const trace = (chord) => {
           backslash = false
         } else {
           start_stick = !start_stick
+        }
+      } else if (point.match(/[:]/)) {
+        if (backslash) {
+          backslash = false
         }
       }
 
